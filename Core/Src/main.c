@@ -36,6 +36,8 @@
 #include <string.h>
 #include "Benchmarking.h"
 #include "Benchmarking_map.h"
+#include "config.h"
+#include "common_includes.h"
 
 /* USER CODE END Includes */
 
@@ -185,7 +187,7 @@ int main(void)
 	  HAL_Delay(500);
 	  //uint32_t start = DWT->CYCCNT;
 	  DWT_start(idx_fast_total);
-	  bool status = FAST_detect();
+
 	  //volatile uint32_t cycles = DWT->CYCCNT - start;
 	  DWT_stop(idx_fast_total);
 	  //DWT_Profile_t profile_fast_total = *DWT_get(idx_fast_total);
@@ -207,7 +209,7 @@ int main(void)
 	  DEBUG_VAR(idx_fast_compute);
 	  DEBUG_VAR(idx_fast_inside);
 
-	  DEBUG_VAR(status);
+
 	  //DEBUG_VAR(profile_fast_total);
 	  //DEBUG_VAR(profile_fast_total_us);
 	  DEBUG_VAR(profiles_timed_total);

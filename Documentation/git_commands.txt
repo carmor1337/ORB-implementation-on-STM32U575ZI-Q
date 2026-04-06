@@ -1,0 +1,31 @@
+
+commit:
+    git add .
+    git commit -m "comment"
+    git push
+
+pull:
+    git checkout <branch name>
+    git pull origin main
+
+pull request:
+
+branch:
+    Create: 
+        git branch <branch name> || git checkout -b <branch name> // creates locally 
+        git push -u origin <branch name>                          // pushes to github, needs to be done first time a new branch is created
+    Destroy:
+        git -d <branch name> // Locally
+        (needs to destroy remotly)
+
+merge:
+    1. Switch to target branch
+        git checkout <branch to merge with> 
+    2. Run the merge
+        git merge <branch to be merged>
+    3. Handle conflicts
+    4. Fix conflicts and then do:
+        git add . 
+        git commit 
+    5. Push merged branch 
+        git push origin <branch to merge with>

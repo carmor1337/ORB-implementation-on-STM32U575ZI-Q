@@ -4,7 +4,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-
+#include "common_includes.h"
 // Variables to have
 // Image heigth and width
 // Number of gaussian pyrramids
@@ -13,39 +13,14 @@
 // Threshold for number of continous in order to be a feature
 
 
-// width x heigth
-#define IMAGE_WIDTH  		   320 // Pixels
-#define IMAGE_HEIGTH		   240 // Pixels
 
-#define MAX_FEATURE_POINTS 256
-#define ILLUMINATION_THRESHOLD 50 // Is in uint8_t
-#define CONTINUOUS_PIXEL_THRESHOLD 12 // Also called fast 12
 
-typedef struct {
-	uint16_t x;
-	uint8_t y;
-}FAST_coordinate_t;
+
 
 typedef struct {
 	uint8_t pixel;
 	uint8_t circle[16];
 }FAST_circle_t;
-
-typedef struct{
-	uint8_t *image;
-	uint16_t width;
-	uint16_t height;
-	uint32_t pixel_index;
-}FAST_t;
-
-typedef struct {
-	uint16_t x; 		// Column position in image
-	uint16_t y;			// Row position in image
-	uint32_t score; 	// Corner response strength
-	float  angle;  	// Orientation in degrees for ORB rotation
-	uint8_t  descriptor[32]; // 256 bit descriptor for ORB
-}ORB_feature_point_t;
-
 
 typedef enum{
 	FAST_PIXEL_BRIGHTER,
@@ -57,9 +32,10 @@ typedef enum{
 
 bool FAST_init(uint8_t *image_start);
 
-bool FAST_detect(void);
 
 bool FAST_assign_image(uint8_t *image_start);
+
+__attribute__((hot)) bool FAST_detect(ORB_t *orb_obj);
 
 // expose read access via functions
 uint16_t FAST_get_feature_count(void);

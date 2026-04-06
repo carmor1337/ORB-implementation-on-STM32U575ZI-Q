@@ -61,11 +61,12 @@ bool ORB_init(uint8_t *image_start){
 	g_orb_obj.height = IMAGE_HEIGTH;
 	g_orb_obj.width = IMAGE_WIDTH;
 	g_orb_obj.feature_point_list = g_feature_points;
-
+	FAST_init();
+	Harris_init();
 	return true;
 }
 
-static bool append_feature_point(uint16_t x, uint16_t y, uint32_t score ){
+static bool append_feature_point(uint16_t x, uint16_t y, float score ){
 	if (g_feature_count >= MAX_FEATURE_POINTS) {
 		        return false;
 		    }
@@ -87,24 +88,31 @@ void ORB_extract_and_match(void){
 				// First FAST
 				// 	Should FAST be run once or chained together?
 #if Profiling
+				DWT_start(idx_FAST_total);
+#endif
 				bool is_feature_point = FAST_detect(&g_orb_obj);
+#if Profiling
+				  DWT_stop(idx_FAST_total);
 #endif
 				if (!is_feature_point){ continue;}
-				uint16_t x = g_orb_obj.pixel_index % IMAGE_WIDTH;
-				uint16_t y = g_orb_obj.pixel_index / IMAGE_WIDTH;
-				// Then Harris score
+				uint16_t x = (uint16_t)g_orb_obj.pixel_index % IMAGE_WIDTH;
+				uint16_t y = (uint16_t)g_orb_obj.pixel_index / IMAGE_WIDTH;
 #if Profiling
+				DWT_start(idx_HARRIS_total);
+#endif
+				// Then Harris score
 				float score = harris_score_compute(&g_orb_obj);
+#if Profiling
+				  DWT_stop(idx_HARRIS_total);
 #endif
 				append_feature_point(x, y, score);
-
-
 				// Then Centroid and angle
 				// Then rotation
 				// Then feature matching
 			}
 	}
 }
+
 
 
 

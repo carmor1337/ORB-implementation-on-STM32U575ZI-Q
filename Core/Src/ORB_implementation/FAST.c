@@ -55,7 +55,7 @@ static const uint8_t wrap[28] = {
 };
 
 
-bool FAST_init(uint8_t *image_start){
+bool FAST_init(void){
 
 
 	return true;

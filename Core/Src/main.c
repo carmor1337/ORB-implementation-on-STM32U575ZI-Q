@@ -31,7 +31,7 @@
 /* USER CODE BEGIN Includes */
 
 #include "test_image.h"
-//#include "ORB.h"
+#include "ORB.h"
 #include "FAST.h"
 #include <string.h>
 #include "Benchmarking.h"
@@ -92,11 +92,10 @@ int main(void)
 
 	DWT_init();
 	DWT_MapInit();
-	int8_t idx_fast_total = DWT_register("FAST: total");
-	int8_t idx_fast_circle = DWT_register("FAST: get circle");
-	int8_t idx_fast_HST = DWT_register("FAST: high speed test");
-	int8_t idx_fast_compute = DWT_register("FAST: compute and score");
-	int8_t idx_fast_inside = DWT_register("FAST: inside total");
+	int8_t idx_ORB_total = DWT_register("ORB: Total");
+	int8_t idx_FAST_total= DWT_register("FAST: Total");
+	int8_t idx_HARRIS_total = DWT_register("Harris: Total");
+
 	// Trying to get the image into ram
 	static uint8_t image_ram[320*240];
 	memcpy(image_ram, test_image, sizeof(image_ram));
@@ -116,8 +115,8 @@ int main(void)
   /* USER CODE BEGIN Init */
 
   volatile uint32_t clock1 = HAL_RCC_GetHCLKFreq();
-    	printf("dummy %ld", clock1);
-
+  printf("dummy %ld", clock1);
+   ORB_init(image_ram);
   /* USER CODE END Init */
 
   /* Configure the System Power */
@@ -173,8 +172,8 @@ int main(void)
   volatile uint32_t clock2 = HAL_RCC_GetHCLKFreq();
   	printf("dummy %ld", clock2);
 
-  	 FAST_init(test_image);
-  	 ORB_feature_point_t* feature_points =  FAST_get_feature_points();
+
+
   while (1)
   {
 
@@ -186,44 +185,22 @@ int main(void)
 	  BSP_LED_Toggle(LED_RED);
 	  HAL_Delay(500);
 	  //uint32_t start = DWT->CYCCNT;
-	  DWT_start(idx_fast_total);
-
+	  DWT_start(idx_ORB_total);
+	  ORB_extract_and_match();
 	  //volatile uint32_t cycles = DWT->CYCCNT - start;
-	  DWT_stop(idx_fast_total);
+	  DWT_stop(idx_ORB_total);
 	  //DWT_Profile_t profile_fast_total = *DWT_get(idx_fast_total);
 	  //DWT_profile_timed_t profile_fast_total_us = DWT_convert_cycles_to_us(idx_fast_total);
 	  DWT_convert_all_profiles_to_timed();
-	  DWT_timed_pair_t profiles_timed_total = 		   *DWT_get_timed(idx_fast_total);
-	  DWT_timed_pair_t profiles_timed_circle = 		   *DWT_get_timed(idx_fast_circle);
-	  DWT_timed_pair_t profiles_timed_HST =            *DWT_get_timed(idx_fast_HST);
-	  DWT_timed_pair_t profiles_timed_compute = 	   *DWT_get_timed(idx_fast_compute);
-	  DWT_timed_pair_t profiles_timed_compute_inside = *DWT_get_timed(idx_fast_inside);
-
-	  DWT_Profile_t profile_circle  = *DWT_get(idx_fast_circle);
-	  DWT_Registry_t regestry = DWT_get_registry();
-	  DWT_timed_pair_t* timed_reg =  DWT_get_timed_registry();
-
-	  DEBUG_VAR(idx_fast_total);
-	  DEBUG_VAR(idx_fast_circle);
-	  DEBUG_VAR(idx_fast_HST);
-	  DEBUG_VAR(idx_fast_compute);
-	  DEBUG_VAR(idx_fast_inside);
 
 
-	  //DEBUG_VAR(profile_fast_total);
-	  //DEBUG_VAR(profile_fast_total_us);
-	  DEBUG_VAR(profiles_timed_total);
-	  DEBUG_VAR(profiles_timed_circle);
-	  DEBUG_VAR(profiles_timed_HST);
-	  DEBUG_VAR(profiles_timed_compute);
-	  DEBUG_VAR(profiles_timed_compute_inside);
-	  DEBUG_VAR(profile_circle );
 
-	  DEBUG_VAR(regestry);
-	  DEBUG_VAR(timed_reg );
+	  DEBUG_VAR(idx_ORB_total);
+	  DEBUG_VAR(idx_FAST_total);
+	  DEBUG_VAR(idx_HARRIS_total);
 
 	  DEBUG_VAR(num_pixels);
-	  DEBUG_VAR(feature_points);
+
 
 
 	  /*

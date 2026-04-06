@@ -19,7 +19,7 @@ typedef struct{
 typedef struct {
 
 	Pixel_t coords;
-	uint32_t score; 		// Corner response strength
+	float score; 		// Corner response strength
 	float  angle;  			// Orientation in degrees for ORB rotation
 	uint8_t  descriptor[32];// 256 bit descriptor for ORB
 }ORB_feature_point_t;

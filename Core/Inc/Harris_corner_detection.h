@@ -20,7 +20,7 @@ typedef struct{
 	uint8_t area[(HARRIS_WINDOW_SIZE + 2) *2]; // +2 is the offset for the area for the sobel operators to work
 }Harris_t;
 
-
-
+bool Harris_init(void);
+float harris_score_compute(ORB_t *orb_obj);
 
 #endif

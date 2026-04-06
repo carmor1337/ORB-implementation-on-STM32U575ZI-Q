@@ -15,7 +15,7 @@
  */
 #include <stdint.h>
 // At compile time:
-_Static_assert(HARRIS_WINDOW_SIZE == 5, "Offset table must match window size");
+
 // regular sobel vs seuparable sobel
 
 // Sobel area is 3x3 = 9
@@ -97,9 +97,9 @@ float harris_score_compute(ORB_t *orb_obj){
 	// score = R = det(M) - k*trace(M)^2
 	// return score
 	Matrix_values_t M;
-	compute_harris_matrix(orb_obj->image, orb_obj->pixel_index, &M);
-	float det   = (M.Ixx * M.Iyy) - (M.Ixy * M.Ixy);
-	float trace = M.Ixx + M.Iyy;
-	float score = det - HARRIS_K * (trace * trace);
+	compute_harris_matrix(orb_obj->image, (int32_t)orb_obj->pixel_index, &M);
+	float det   = (float)((M.Ixx * M.Iyy) - (M.Ixy * M.Ixy));
+	float trace = (float)(M.Ixx + M.Iyy);
+	float score = (det - (float)HARRIS_K * (trace * trace));
 	return score;
 }

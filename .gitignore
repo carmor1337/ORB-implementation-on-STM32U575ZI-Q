@@ -1,0 +1,16 @@
+# Build output
+Debug/
+Release/
+
+# STM32CubeIDE settings (optional, some prefer to include these)
+.settings/
+.metadata/
+
+# Object files
+*.o
+*.d
+*.elf
+*.bin
+*.hex
+*.map
+*.lst

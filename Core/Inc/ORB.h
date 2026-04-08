@@ -10,20 +10,16 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-
-#define PATCH_SIZE 31
-
-
-typedef struct {
-	uint8_t pixel;
-	uint8_t patch_size[PATCH_SIZE*PATCH_SIZE];
-}ORB_patch_t;
+#include "common_includes.h"
 
 
 
+
+
+bool ORB_init(uint8_t *image_start);
 
 void ORB_extract_and_match(void);
 
-bool ORB_init(uint8_t *image_start);
+void get_ORB_patch(ORB_t *orb_obj,ORB_keypoint_patch_t *patch);
 
 #endif /* INC_ORB_H_ */

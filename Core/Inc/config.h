@@ -18,6 +18,7 @@
 
 // ORB Config
 #define MAX_FEATURE_POINTS 700
+#define PATCH_SIZE 31
 
 // FAST Config
 #define ILLUMINATION_THRESHOLD 50 // Is in uint8_t

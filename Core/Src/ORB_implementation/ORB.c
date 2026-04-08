@@ -19,6 +19,7 @@
 #include "ORB.h"
 #include "FAST.h"
 #include "Harris_corner_detection.h"
+#include "Orientation.h"
 #include "rBrief.h"
 
 #define Profiling 0
@@ -79,6 +80,21 @@ static bool append_feature_point(uint16_t x, uint16_t y, float score ){
 		return true;
 }
 
+// Assume that current pixel is the pixel we want
+void get_ORB_patch(ORB_t *orb_obj,ORB_keypoint_patch_t *patch){
+	patch->pixel = orb_obj->pixel_index;
+	for (int y = 0; y < 31; y++){
+		for (int x = 0; x < 31; x++){
+			int img_idx = (-15 + y)*IMAGE_WIDTH + (-15 + x);
+
+			patch->patch_data[x][y] = orb_obj->image[img_idx];
+		}
+
+	}
+	return;
+}
+
+
 /// Extracts the feature points and match
 void ORB_extract_and_match(void){
 	for (int row=3; row <g_orb_obj.height-3; row++){
@@ -106,7 +122,13 @@ void ORB_extract_and_match(void){
 				  DWT_stop(idx_HARRIS_total);
 #endif
 				append_feature_point(x, y, score);
+				ORB_keypoint_patch_t patch;
+				ORB_feature_point_t *fp = &g_orb_obj.feature_point_list[g_feature_count];
+				get_ORB_patch(&g_orb_obj, &patch);
+				compute_intensity_centroid(&g_orb_obj,fp,g_orb_obj.pixel_index );
+				rBRIEF_compute(fp, &patch);
 				// Then Centroid and angle
+
 				// Then rotation
 				// Then feature matching
 			}

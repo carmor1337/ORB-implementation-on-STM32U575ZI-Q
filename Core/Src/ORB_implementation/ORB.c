@@ -22,7 +22,7 @@
 #include "Orientation.h"
 #include "rBrief.h"
 
-#define Profiling 0
+#define Profiling 1
 
 
 static ORB_t g_orb_obj;
@@ -104,37 +104,53 @@ void ORB_extract_and_match(void){
 				// First FAST
 				// 	Should FAST be run once or chained together?
 #if Profiling
-				DWT_start(idx_FAST_total);
+				DWT_start(DWT_Lookup("FAST"));
 #endif
 				bool is_feature_point = FAST_detect(&g_orb_obj);
 #if Profiling
-				  DWT_stop(idx_FAST_total);
+				  DWT_stop(DWT_Lookup("FAST"));
 #endif
 				if (!is_feature_point){ continue;}
 				uint16_t x = (uint16_t)g_orb_obj.pixel_index % IMAGE_WIDTH;
 				uint16_t y = (uint16_t)g_orb_obj.pixel_index / IMAGE_WIDTH;
 #if Profiling
-				DWT_start(idx_HARRIS_total);
+				DWT_start(DWT_Lookup("Harris"));
 #endif
 				// Then Harris score
 				float score = harris_score_compute(&g_orb_obj);
+
 #if Profiling
-				  DWT_stop(idx_HARRIS_total);
+				  DWT_stop(DWT_Lookup("Harris"));
 #endif
-				append_feature_point(x, y, score);
+
+			    append_feature_point(x, y, score);
 				ORB_keypoint_patch_t patch;
 				ORB_feature_point_t *fp = &g_orb_obj.feature_point_list[g_feature_count];
-				get_ORB_patch(&g_orb_obj, &patch);
-				compute_intensity_centroid(&g_orb_obj,fp,g_orb_obj.pixel_index );
-				rBRIEF_compute(fp, &patch);
-				// Then Centroid and angle
 
-				// Then rotation
-				// Then feature matching
+				get_ORB_patch(&g_orb_obj, &patch);
+#if Profiling
+				DWT_start(DWT_Lookup("Centroid"));
+#endif
+
+				compute_intensity_centroid(&g_orb_obj,fp,g_orb_obj.pixel_index );
+
+#if Profiling
+			    DWT_stop(DWT_Lookup("Centroid"));
+
+				DWT_start(DWT_Lookup("rBRIEF"));
+#endif
+
+				rBRIEF_compute(fp, &patch);
+
+#if Profiling
+				DWT_stop(DWT_Lookup("rBRIEF"));
+#endif
+
 			}
 	}
+
 }
 
-
+void send_benchmark_and_keypoints_uart(void)
 
 

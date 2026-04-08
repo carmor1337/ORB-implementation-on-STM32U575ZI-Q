@@ -92,16 +92,19 @@ int main(void)
 
 	DWT_init();
 	DWT_MapInit();
-	int8_t idx_ORB_total = DWT_register("ORB: Total");
-	int8_t idx_FAST_total= DWT_register("FAST: Total");
-	int8_t idx_HARRIS_total = DWT_register("Harris: Total");
+	int8_t idx_ORB_total =   DWT_register("ORB");
+	int8_t idx_FAST_total=   DWT_register("FAST");
+	int8_t idx_HARRIS_total = DWT_register("Harris");
+	int8_t idx_Centroid_total = DWT_register("Centroid");
+	int8_t idx_rBRIEF_total = DWT_register("rBRIEF");
 
 	// Trying to get the image into ram
 	static uint8_t image_ram[320*240];
 	memcpy(image_ram, test_image, sizeof(image_ram));
 
 	static const int num_pixels = IMAGE_HEIGTH * IMAGE_WIDTH;
-
+	// Kitty dataset has 1241 x 376
+	static const int32_t kitti_num_pixels = 2341 * 376;
 
 
 
@@ -192,16 +195,45 @@ int main(void)
 	  //DWT_Profile_t profile_fast_total = *DWT_get(idx_fast_total);
 	  //DWT_profile_timed_t profile_fast_total_us = DWT_convert_cycles_to_us(idx_fast_total);
 	  DWT_convert_all_profiles_to_timed();
+	  DWT_Profile_t *ORB_profile = DWT_get(idx_ORB_total);
+	  DWT_timed_pair_t *Orb_profile_timed =DWT_get_timed(idx_ORB_total);
+	  DWT_timed_pair_t *FAST_timed =DWT_get_timed(idx_FAST_total);
+	  DWT_timed_pair_t *HARRIS_timed =DWT_get_timed(idx_HARRIS_total);
+	  DWT_timed_pair_t *Centroid_timed =DWT_get_timed(idx_Centroid_total);
+	  DWT_timed_pair_t *rBRIEF_timed =DWT_get_timed(idx_rBRIEF_total);
+	  DWT_timed_pair_t *ORB_all_profiles_timed =DWT_get_timed_registry();
 
-
+	  double us_per_pixel = (int)ORB_profile->avg/num_pixels;
+	  us_per_pixel = us_per_pixel/(SystemCoreClock / 1000000.0);
+	  double kitti_time_us = us_per_pixel*kitti_num_pixels;
 
 	  DEBUG_VAR(idx_ORB_total);
 	  DEBUG_VAR(idx_FAST_total);
 	  DEBUG_VAR(idx_HARRIS_total);
+	  DEBUG_VAR(idx_Centroid_total);
+	  DEBUG_VAR(idx_rBRIEF_total);
+
+	  DEBUG_VAR(ORB_profile);
+	  DEBUG_VAR(Orb_profile_timed);
+	  DEBUG_VAR(ORB_all_profiles_timed);
+	  DEBUG_VAR(FAST_timed);
+	  DEBUG_VAR(HARRIS_timed);
+	  DEBUG_VAR(Centroid_timed);
+	  DEBUG_VAR(rBRIEF_timed);
 
 	  DEBUG_VAR(num_pixels);
+	  DEBUG_VAR(kitti_num_pixels);
+	  DEBUG_VAR(kitti_time_us);
 
 
+	  DEBUG_VAR(Orb_profile_timed);
+	  DEBUG_VAR(Orb_profile_timed);
+	  DEBUG_VAR(ORB_profile);
+	  DEBUG_VAR(Orb_profile_timed);
+	  DEBUG_VAR(Orb_profile_timed);
+	  DEBUG_VAR(ORB_profile);
+	  DEBUG_VAR(Orb_profile_timed);
+	  DEBUG_VAR(Orb_profile_timed);
 
 	  /*
 	  uint32_t microseconds = cycles / (SystemCoreClock / 1000000U);

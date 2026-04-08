@@ -9,9 +9,9 @@
 
 
 typedef struct{
-	int32_t Ixx;
-	int32_t Ixy;
-	int32_t Iyy;
+	int64_t Ixx;
+	int64_t Ixy;
+	int64_t Iyy;
 }Matrix_values_t;
 
 

@@ -60,12 +60,12 @@ bool Harris_init(void){
 }
 
 static void compute_harris_matrix(uint8_t *image, int32_t index, Matrix_values_t* matrix_values ){
-	int32_t Ix = 0;
-	int32_t Iy = 0;
-	int32_t Ixx = 0;
-	int32_t Ixy = 0;
-	int32_t Iyy = 0;
-	int32_t idx = 0;
+	int64_t Ix = 0;
+	int64_t Iy = 0;
+	int64_t Ixx = 0;
+	int64_t Ixy = 0;
+	int64_t Iyy = 0;
+	int64_t idx = 0;
 	// Sobel operator is a 3x3 matrix therefore the 3
 	for (int i = 0; i < (HARRIS_WINDOW_SIZE*HARRIS_WINDOW_SIZE); i++){
 		Ix = 0;
@@ -73,8 +73,8 @@ static void compute_harris_matrix(uint8_t *image, int32_t index, Matrix_values_t
 		idx = (int32_t) index + HARRIS_AREA_OFFSETS_5x5[i];
 		// Applies the sobel operator
 		for (int j = 0; j< 9; j++){
-			Ix += (int32_t)image[(int32_t)idx + SOBEL_OFFSETS[j]] * SOBEL_X_VALUES[j];
-			Iy += (int32_t)image[(int32_t)idx + SOBEL_OFFSETS[j]] * SOBEL_Y_VALUES[j];
+			Ix += (int64_t)image[(int64_t)idx + SOBEL_OFFSETS[j]] * SOBEL_X_VALUES[j];
+			Iy += (int64_t)image[(int64_t)idx + SOBEL_OFFSETS[j]] * SOBEL_Y_VALUES[j];
 		}
 		Ixx += Ix*Ix;
 		Ixy += Ix*Iy;
@@ -96,10 +96,10 @@ float harris_score_compute(ORB_t *orb_obj){
 	// Construct M matrix
 	// score = R = det(M) - k*trace(M)^2
 	// return score
-	Matrix_values_t M;
+	Matrix_values_t M= {0};
 	compute_harris_matrix(orb_obj->image, (int32_t)orb_obj->pixel_index, &M);
-	float det   = (float)((M.Ixx * M.Iyy) - (M.Ixy * M.Ixy));
-	float trace = (float)(M.Ixx + M.Iyy);
+	float det   = ((float)M.Ixx * (float)M.Iyy) - ((float)M.Ixy * (float)M.Ixy);
+	float trace = (float)((float)M.Ixx + (float)M.Iyy);
 	float score = (det - (float)HARRIS_K * (trace * trace));
 	return score;
 }

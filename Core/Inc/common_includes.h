@@ -22,7 +22,7 @@ typedef struct {
 	Pixel_t  coords;
 	float    score; 		 // Corner response strength
 	float    angle;  		 // Orientation in radians for ORB rotation
-	uint8_t  descriptor[32]; // 256 bit descriptor for ORB
+	uint8_t  descriptor[DESCRIPTOR_BYTES]; // 256 bit descriptor for ORB
 }ORB_feature_point_t;
 
 typedef struct {
@@ -38,6 +38,8 @@ typedef struct {
 	uint32_t pixel; // the pixel index of the patch
 	uint8_t patch_data[PATCH_SIZE][PATCH_SIZE];
 }ORB_keypoint_patch_t;
+
+
 
 
 #endif /* INC_COMMON_INCLUDES_H_ */

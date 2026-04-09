@@ -5,7 +5,8 @@
 #include "common_includes.h"
 #include "config.h"
 #include <string.h>
-//
+#include "Benchmarking.h"
+#include "Benchmarking_map.h"
 
 
 
@@ -293,15 +294,19 @@ void rBRIEF_compute(ORB_feature_point_t *feature_point, ORB_keypoint_patch_t *pa
 		int dy1 = sampling_pattern[sample_idx+1];
 		int dx2 = sampling_pattern[sample_idx+2];
 		int dy2 = sampling_pattern[sample_idx+3];
-
-		// 🔁 rotate first point
+#if rBRIEF_PROFILING
+		DWT_start(DWT_Lookup("rBRIEF:roatation"));
+#endif
+		//  rotate first point
 		int rdx1 = (int)roundf((float)dx1 * cos_t - (float)dy1 * sin_t);
 		int rdy1 = (int)roundf((float)dx1 * sin_t + (float)dy1 * cos_t);
 
-		// 🔁 rotate second point
+		//  rotate second point
 		int rdx2 = (int)roundf((float)dx2 * cos_t - (float)dy2 * sin_t);
 		int rdy2 = (int)roundf((float)dx2 * sin_t + (float)dy2 * cos_t);
-
+#if rBRIEF_PROFILING
+		DWT_stop(DWT_Lookup("rBRIEF:roatation"));
+#endif
 		int x1 = center_index + rdx1;
 		int y1 = center_index + rdy1;
 
@@ -312,6 +317,9 @@ void rBRIEF_compute(ORB_feature_point_t *feature_point, ORB_keypoint_patch_t *pa
 		            x2 < 0 || x2 >= 31 || y2 < 0 || y2 >= 31) {
 		            continue;
 		        }
+#if rBRIEF_PROFILING
+		DWT_start(DWT_Lookup("rBRIEF:Sample"));
+#endif
 		uint8_t val_1 = patch->patch_data[center_index + dx1][center_index + dy1];
 		uint8_t val_2 = patch->patch_data[center_index + dx2][center_index + dy2];
 
@@ -320,6 +328,9 @@ void rBRIEF_compute(ORB_feature_point_t *feature_point, ORB_keypoint_patch_t *pa
 			int bit_index = 7 - (i % 8); // MSB first
 			feature_point->descriptor[byte_index] |= (1<<bit_index);
 		}
+#if rBRIEF_PROFILING
+		DWT_stop(DWT_Lookup("rBRIEF:Sample"));
+#endif
 	}
 }
 

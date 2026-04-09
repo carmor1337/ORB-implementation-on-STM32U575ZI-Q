@@ -2,9 +2,12 @@
 
 
 #include <stdbool.h>
+#include <assert.h>
 #include "Harris_corner_detection.h"
 #include "common_includes.h"
-#include <assert.h>
+
+#include "Benchmarking.h"
+#include "Benchmarking_map.h"
 /*
  * apply the 3x3 Sobel operator to each pixel within a 7x7 window around fast feature point
  *
@@ -56,7 +59,7 @@ static const int32_t HARRIS_AREA_OFFSETS_5x5[25] = {
 	};
 
 bool Harris_init(void){
-	return true;
+	return (true);
 }
 
 static void compute_harris_matrix(uint8_t *image, int32_t index, Matrix_values_t* matrix_values ){
@@ -97,7 +100,15 @@ float harris_score_compute(ORB_t *orb_obj){
 	// score = R = det(M) - k*trace(M)^2
 	// return score
 	Matrix_values_t M= {0};
+#if HARRIS_PROFILING
+	DWT_start(DWT_Lookup("HARRIS:matrix"));
+#endif
+
 	compute_harris_matrix(orb_obj->image, (int32_t)orb_obj->pixel_index, &M);
+
+#if HARRIS_PROFILING
+	DWT_stop(DWT_Lookup("HARRIS:matrix"));
+#endif
 	float det   = ((float)M.Ixx * (float)M.Iyy) - ((float)M.Ixy * (float)M.Ixy);
 	float trace = (float)((float)M.Ixx + (float)M.Iyy);
 	float score = (det - (float)HARRIS_K * (trace * trace));

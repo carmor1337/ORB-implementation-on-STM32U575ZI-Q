@@ -12,7 +12,8 @@
 
 #include "common_includes.h"
 #include "config.h"
-
+#include "Benchmarking.h"
+#include "Benchmarking_map.h"
 
 
 // 31 x 31 area
@@ -22,7 +23,9 @@
 
 
 void compute_intensity_centroid(ORB_t *orb_obj, ORB_feature_point_t *feature_point ,uint32_t pixel_center){
-
+#if CENTROID_PROFILING
+	DWT_start(DWT_Lookup("Centroid:m01,m10"));
+#endif
 	float m10 = 0; // Sum of x*I for all x,y
 	float m01 = 0; // Sum of y*I for all x,y
 	for (int32_t y = -15; y <= 15; y++){
@@ -34,6 +37,16 @@ void compute_intensity_centroid(ORB_t *orb_obj, ORB_feature_point_t *feature_poi
 			}
 		}
 	}
+#if CENTROID_PROFILING
+	DWT_stop(DWT_Lookup("Centroid:m01,m10"));
+
+	DWT_start(DWT_Lookup("Centroid:atan2"));
+#endif
+
 	feature_point->angle = atan2f(m01, m10);
+
+#if CENTROID_PROFILING
+	DWT_stop(DWT_Lookup("Centroid:atan2"));
+#endif
 }
 

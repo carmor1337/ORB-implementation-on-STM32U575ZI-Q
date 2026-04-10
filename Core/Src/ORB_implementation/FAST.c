@@ -42,11 +42,12 @@ static const int32_t CIRCLE_OFFSETS[16] = {
 
 // This is a wrap for checking for concecutive pixels
 // For FAST 12
+/*
 static const uint8_t wrap[28] = {
     0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
     0,1,2,3,4,5,6,7,8,9,10,11
 };
-
+*/
 
 bool FAST_init(void){
 
@@ -163,32 +164,46 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 	DWT_stop(DWT_Lookup("FAST: HST"));
 #endif
 
-
-	int bright_run = 0;
-	int dark_run   = 0;
-
-	for (int i = 0; i < 16 + CONTINUOUS_PIXEL_THRESHOLD; i++) {
-	    uint8_t c = pixels.circle[wrap[i]];
-	    int16_t brighter = (int16_t)(origin - c);
-	    int16_t darker   = (int16_t)(c - origin);
-
-	    // accumulate score only for first 16 pixels
-	    if (i < 16) score += (uint32_t)(brighter > 0 ? brighter : darker);
-
-	    if      (brighter > ILLUMINATION_THRESHOLD) { bright_run++; dark_run = 0; }
-	    else if (darker   > ILLUMINATION_THRESHOLD) { dark_run++; bright_run = 0; }
-	    else                                         { bright_run = 0; dark_run = 0; }
-
-	    if (bright_run >= CONTINUOUS_PIXEL_THRESHOLD ||
-	        dark_run   >= CONTINUOUS_PIXEL_THRESHOLD) {
-	        //feature_point->x = (uint16_t)orb_obj->pixel_index % IMAGE_WIDTH;
-	        //feature_point->y = (uint16_t)orb_obj->pixel_index / IMAGE_WIDTH;
-	        //feature_point->score = score;
-	        return true;
-	    }
+	uint32_t buffer_dark   = 0x0;
+	uint32_t buffer_bright = 0x0;
+	uint32_t extender = 0x7FF; // 11 1s in a row to exted with
+	uint32_t threshold_result = 0;
+	// Optimization is to do a bit shift check
+	for (int i = 0; i < 16 ; i++){
+		uint8_t c = pixels.circle[i];
+		bool brighter = (origin - c) > ILLUMINATION_THRESHOLD;
+		bool darker   = (c - origin) > ILLUMINATION_THRESHOLD;
+		// If set the bits at once with the bit mask
+		threshold_result |= (darker<<(i + 16));
+		threshold_result |= (brighter<<i);
 	}
-	return false;
-}
+
+	uint32_t base_dark = (threshold_result >> 16) & 0xFFFF;
+	uint32_t ext_dark  = base_dark & extender;
+
+	buffer_dark = base_dark | (ext_dark << 16);
+
+
+	uint32_t base_bright = (threshold_result >> 0) & 0xFFFF;
+	uint32_t ext_bright  = base_bright & extender;
+
+	buffer_bright = base_bright | (ext_bright << 16);
+
+
+	for (int k = 0; k < 16 ; k++){
+		if ((buffer_dark && extender) == extender){
+			return (true);
+			}
+		if ((buffer_bright && extender) == extender){
+					return (true);
+			}
+
+		buffer_dark >>= 1;
+		buffer_bright >>= 1;
+	}
+	return (false);
+	}
+
 
 
 

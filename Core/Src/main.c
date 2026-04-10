@@ -290,7 +290,7 @@ int main(void)
 	  us_per_pixel = us_per_pixel/(SystemCoreClock / 1000000.0);
 	  double kitti_time_us = us_per_pixel*kitti_num_pixels;
 	  const char feature_msg[] = "None";
-	  const char performance_msg[] = "Improved the consecutive check by using a rotating mask instead of rotating the buffer";
+	  const char performance_msg[] = "Improved the consecutive check by AND:ing the bits when right shifted";
 	  output_commit_message(feature_msg,performance_msg );
 
 	  uint32_t used = stack_usage();

@@ -184,16 +184,16 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 		bright |= (brighter << i);
 	}
 
-	uint16_t consecutive_bit_mask = 0x0FFF;
 
-	for (int k = 0; k < 16; k++) {
-		if ((dark   & consecutive_bit_mask) == consecutive_bit_mask) return true;
-		if ((bright & consecutive_bit_mask) == consecutive_bit_mask) return true;
+	uint32_t x = (uint32_t)((dark << 16) | dark);
+	uint32_t y = (uint32_t)((bright << 16) | bright);
 
-		dark   = (dark >> 1) | (dark << 15);
-		bright = (bright >> 1) | (bright << 15);
+
+	for (int i = 1; i < 12; i++) {
+		x &= (x >> i);
+		y &= (y >> i);
 	}
-
+	if (x!=0 || y!=0) return (true);
 	return (false);
 	}
 

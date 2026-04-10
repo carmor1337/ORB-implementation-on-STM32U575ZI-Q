@@ -42,5 +42,5 @@ void ORB_extract_and_match(void);
 void get_ORB_patch(ORB_t *orb_obj,ORB_keypoint_patch_t *patch);
 
 void send_benchmark_and_keypoints_commit(void);
-
+uint16_t ORB_get_feature_count(void);
 #endif /* INC_ORB_H_ */

@@ -38,6 +38,7 @@
 #include "Benchmarking_map.h"
 #include "config.h"
 #include "common_includes.h"
+#include "output.h"
 
 /* USER CODE END Includes */
 
@@ -85,6 +86,25 @@ static void SystemPower_Config(void);
 	    return (len);
 	}
 
+// In main.c, add these two functions
+void stack_paint(void) {
+	extern uint32_t _estack;
+	extern uint32_t _Min_Stack_Size;
+	uint32_t stack_bottom = (uint32_t)&_estack - (uint32_t)&_Min_Stack_Size;
+	uint32_t *p = (uint32_t*)stack_bottom;
+	while (p < (uint32_t*)__get_MSP())
+		*p++ = 0xDEADBEEF;
+}
+
+uint32_t stack_usage(void) {
+	extern uint32_t _estack;
+	extern uint32_t _Min_Stack_Size;
+	uint32_t stack_bottom = (uint32_t)&_estack - (uint32_t)&_Min_Stack_Size;
+	uint32_t *p = (uint32_t*)stack_bottom;
+	while (*p == 0xDEADBEEF) p++;
+	return (uint32_t)&_estack - (uint32_t)p;
+}
+
 
 /* USER CODE END 0 */
 
@@ -96,6 +116,8 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
+	stack_paint();
+
 
 	//CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
 	//DWT->CYCCNT = 0;
@@ -151,7 +173,7 @@ int main(void)
 
 
 	// Trying to get the image into ram
-	static uint8_t image_ram[IMAGE_WIDTH*IMAGE_HEIGTH];
+	static uint8_t image_ram[IMAGE_WIDTH * IMAGE_HEIGTH];
 	memcpy(image_ram, test_image, sizeof(image_ram));
 
 	static const int num_pixels = IMAGE_HEIGTH * IMAGE_WIDTH;
@@ -228,7 +250,6 @@ int main(void)
 
 
 
-
   while (1)
   {
 
@@ -239,13 +260,13 @@ int main(void)
 	  HAL_Delay(LED_BLINK_WAIT);
 	  BSP_LED_Toggle(LED_RED);
 	  HAL_Delay(LED_BLINK_WAIT);
-	  //uint32_t start = DWT->CYCCNT;
+
 	  DWT_start(idx_ORB_total);
+
 	  ORB_extract_and_match();
-	  //volatile uint32_t cycles = DWT->CYCCNT - start;
+
 	  DWT_stop(idx_ORB_total);
-	  //DWT_Profile_t profile_fast_total = *DWT_get(idx_fast_total);
-	  //DWT_profile_timed_t profile_fast_total_us = DWT_convert_cycles_to_us(idx_fast_total);
+
 	  DWT_convert_all_profiles_to_timed();
 	  DWT_Profile_t *ORB_profile = DWT_get(idx_ORB_total);
 	  DWT_timed_pair_t *Orb_profile_timed =DWT_get_timed(idx_ORB_total);
@@ -266,7 +287,11 @@ int main(void)
 	  double us_per_pixel = (int)ORB_profile->avg/num_pixels;
 	  us_per_pixel = us_per_pixel/(SystemCoreClock / 1000000.0);
 	  double kitti_time_us = us_per_pixel*kitti_num_pixels;
-	  send_benchmark_and_keypoints_commit();
+	  const char feature_msg[] = "Added the functionality to get a message in the SWV viewer with measurements. Primary use will be benchmarking and commit messages";
+	  const char performance_msg[] = "Broke the output messages into its own file to keep things clean";
+	  output_commit_message(feature_msg,performance_msg );
+
+	  uint32_t used = stack_usage();
 	  DWT_aggregate_reset_all();
 
 	  DEBUG_VAR(idx_ORB_total);
@@ -283,7 +308,7 @@ int main(void)
 
 	  DEBUG_VAR(clock1);
 	  DEBUG_VAR(clock2);
-	  DEBUG_VAR(ORB_profile);
+	  DEBUG_VAR(used);
 	  DEBUG_VAR(Orb_profile_timed);
 	  DEBUG_VAR(Orb_profile_timed);
 	  DEBUG_VAR(ORB_profile);

@@ -9,28 +9,28 @@
 #define INC_BENCHMARKING_H
 
 
-
+#include <stdint.h>
 #define DWT_MAX_PROFILES 10
 
 typedef struct {
-    const char *label;      		// Name of the measured section
-    uint32_t    start;      		// DWT->CYCCNT snapshot at start
-    uint32_t    elapsed;    		// Cycles taken (last run)
-    uint32_t    min;        		// Minimum cycles recorded
-    uint32_t    max;        		// Maximum cycles recorded
-    uint32_t    avg;        		// Running average (cycles)
-    uint32_t    runs;       		// Number of measurements taken
-    uint32_t    aggregate;  		// Total time spent in the profiler
+    volatile const char *label;      		// Name of the measured section
+    volatile uint32_t    start;      		// DWT->CYCCNT snapshot at start
+    volatile uint32_t    elapsed;    		// Cycles taken (last run)
+    volatile uint32_t    min;        		// Minimum cycles recorded
+    volatile uint32_t    max;        		// Maximum cycles recorded
+    volatile uint32_t    avg;        		// Running average (cycles)
+    volatile uint32_t    runs;       		// Number of measurements taken
+    volatile uint32_t    aggregate;  		// Total time spent in the profiler
     //uint32_t 	load_store_stalls;  // Number of memory access delays
 } DWT_Profile_t;
 
 
 typedef struct {
-	const char *label;
-    double    min;        // Minimum time in recorded
-    double    max;        // Maximum time in recorded
-    double    avg;        // Running
-    double    aggregate;	// total time
+	volatile const char *label;
+	volatile double    min;        // Minimum time in recorded
+	volatile double    max;        // Maximum time in recorded
+	volatile double    avg;        // Running
+	volatile double    aggregate;	// total time
 } DWT_profile_timed_t;
 
 typedef struct {
@@ -39,8 +39,8 @@ typedef struct {
 } DWT_Registry_t;
 
 typedef struct {
-	DWT_profile_timed_t profiles_us;
-	DWT_profile_timed_t profiles_ms;
+	volatile DWT_profile_timed_t profiles_us;
+	volatile DWT_profile_timed_t profiles_ms;
 }DWT_timed_pair_t;
 
 

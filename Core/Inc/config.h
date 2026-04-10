@@ -14,7 +14,7 @@
 #define IMAGE_HEIGTH		   240 // Pixels
 
 // Benchmarking configs
-#define ORB_PROFILING 	   0
+#define ORB_PROFILING 	   1
 #define FAST_PROFILING 	   0
 #define NMS_PROFILING      0
 #define HARRIS_PROFILING   0
@@ -34,6 +34,10 @@
 #define COL_PART  17
 #define COL_NUM   10
 
+#define COL_OVERVIEW_SECTION_NAME  12
+#define COL_OVERVIEW_NUM 6
+#define COL_OVERVIEV_PERCENTAGE 5
+
 // ORB Config
 #define MAX_FEATURE_POINTS 700
 #define PATCH_SIZE 		   31
@@ -46,6 +50,8 @@
 // Harris Config
 #define HARRIS_K           0.04
 #define HARRIS_WINDOW_SIZE 5
+
+// Centroid Config
 
 // rBRIEF Config
 #define DESCRIPTOR_BYTES 8

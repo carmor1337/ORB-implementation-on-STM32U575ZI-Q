@@ -287,8 +287,8 @@ int main(void)
 	  double us_per_pixel = (int)ORB_profile->avg/num_pixels;
 	  us_per_pixel = us_per_pixel/(SystemCoreClock / 1000000.0);
 	  double kitti_time_us = us_per_pixel*kitti_num_pixels;
-	  const char feature_msg[] = "Added the functionality to get a message in the SWV viewer with measurements. Primary use will be benchmarking and commit messages";
-	  const char performance_msg[] = "Broke the output messages into its own file to keep things clean";
+	  const char feature_msg[] = "Added FAST bit shift consecutive check";
+	  const char performance_msg[] = "Improved FAST check if enough consecutive pixels are of the same type ";
 	  output_commit_message(feature_msg,performance_msg );
 
 	  uint32_t used = stack_usage();

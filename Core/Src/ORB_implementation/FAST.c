@@ -146,7 +146,15 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 	// decide to append point if not
 	// 16 comes from the number of pixels to compare with
 	FAST_circle_t pixels;
+#if FAST_PROFILING
+	DWT_start(DWT_Lookup("FAST: Circle"));
+#endif
+
 	FAST_get_circle(orb_obj, &pixels);
+
+#if FAST_PROFILING
+	DWT_start(DWT_Lookup("FAST: Circle"));
+#endif
 	uint8_t origin = pixels.pixel;
 	uint32_t score = 0;
 
@@ -164,39 +172,28 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 	DWT_stop(DWT_Lookup("FAST: HST"));
 #endif
 
-	uint32_t buffer_dark   = 0x0;
-	uint32_t buffer_bright = 0x0;
-	uint32_t extender = 0x7FF; // 11 1s in a row to exted with
-	uint32_t threshold_result = 0;
+	uint16_t dark   = 0x0;
+	uint16_t bright = 0x0;
 	// Optimization is to do a bit shift check
 	for (int i = 0; i < 16 ; i++){
 		uint8_t c = pixels.circle[i];
-		bool brighter = (origin - c) > ILLUMINATION_THRESHOLD;
+		bool brighter = (c > origin) && ((c - origin) > ILLUMINATION_THRESHOLD);
 		bool darker   = (origin > c) && ((origin - c) > ILLUMINATION_THRESHOLD);
-		// If set the bits at once with the bit mask
-		threshold_result |= (darker<<(i + 16));
-		threshold_result |= (brighter<<i);
+		// Each bit represent if the pixel differance was greater than the threshold
+		dark   |= (darker   << i);
+		bright |= (brighter << i);
 	}
 
-	uint32_t base_dark = (threshold_result >> 16) & 0xFFFF;
-	uint32_t ext_dark  = base_dark & extender;
+	uint16_t consecutive_bit_mask = 0x0FFF;
 
-	buffer_dark = base_dark | (ext_dark << 16);
+	for (int k = 0; k < 16; k++) {
+		if ((dark   & consecutive_bit_mask) == consecutive_bit_mask) return true;
+		if ((bright & consecutive_bit_mask) == consecutive_bit_mask) return true;
 
-
-	uint32_t base_bright = (threshold_result >> 0) & 0xFFFF;
-	uint32_t ext_bright  = base_bright & extender;
-
-	buffer_bright = base_bright | (ext_bright << 16);
-
-
-	for (int k = 0; k < 16 ; k++){
-		uint32_t dark_window = (buffer_dark >> k) & extender;
-		    if (dark_window == extender) return (true);
-
-		    uint32_t bright_window = (buffer_bright >> k) & extender;
-		    if (bright_window == extender) return (true);
+		dark   = (dark >> 1) | (dark << 15);
+		bright = (bright >> 1) | (bright << 15);
 	}
+
 	return (false);
 	}
 

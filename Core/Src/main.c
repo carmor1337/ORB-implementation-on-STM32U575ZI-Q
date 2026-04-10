@@ -142,6 +142,8 @@ int main(void)
 #if FAST_PROFILING
 	int8_t idx_FAST_HSP=   DWT_register("FAST: HST");
 	DEBUG_VAR(idx_FAST_HSP);
+	int8_t idx_FAST_get_circle=   DWT_register("FAST: Circle");
+	DEBUG_VAR(idx_FAST_get_circle);
 #endif
 
 	// Harris profiles
@@ -287,8 +289,8 @@ int main(void)
 	  double us_per_pixel = (int)ORB_profile->avg/num_pixels;
 	  us_per_pixel = us_per_pixel/(SystemCoreClock / 1000000.0);
 	  double kitti_time_us = us_per_pixel*kitti_num_pixels;
-	  const char feature_msg[] = "Added FAST bit shift consecutive check";
-	  const char performance_msg[] = "Improved FAST check if enough consecutive pixels are of the same type ";
+	  const char feature_msg[] = "None";
+	  const char performance_msg[] = "Improved the consecutive check by using a rotating mask instead of rotating the buffer";
 	  output_commit_message(feature_msg,performance_msg );
 
 	  uint32_t used = stack_usage();

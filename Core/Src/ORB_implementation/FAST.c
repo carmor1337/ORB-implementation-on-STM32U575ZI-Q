@@ -172,7 +172,7 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 	for (int i = 0; i < 16 ; i++){
 		uint8_t c = pixels.circle[i];
 		bool brighter = (origin - c) > ILLUMINATION_THRESHOLD;
-		bool darker   = (c - origin) > ILLUMINATION_THRESHOLD;
+		bool darker   = (origin > c) && ((origin - c) > ILLUMINATION_THRESHOLD);
 		// If set the bits at once with the bit mask
 		threshold_result |= (darker<<(i + 16));
 		threshold_result |= (brighter<<i);
@@ -191,15 +191,11 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 
 
 	for (int k = 0; k < 16 ; k++){
-		if ((buffer_dark && extender) == extender){
-			return (true);
-			}
-		if ((buffer_bright && extender) == extender){
-					return (true);
-			}
+		uint32_t dark_window = (buffer_dark >> k) & extender;
+		    if (dark_window == extender) return (true);
 
-		buffer_dark >>= 1;
-		buffer_bright >>= 1;
+		    uint32_t bright_window = (buffer_bright >> k) & extender;
+		    if (bright_window == extender) return (true);
 	}
 	return (false);
 	}

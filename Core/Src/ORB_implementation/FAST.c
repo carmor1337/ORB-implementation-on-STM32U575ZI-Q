@@ -31,7 +31,7 @@
  *
  */
 
-
+static uint8_t consecutive_LUT[65536];
 
 static const int32_t CIRCLE_OFFSETS[16] = {
 	    -3*IMAGE_WIDTH+0, -3*IMAGE_WIDTH+1, -2*IMAGE_WIDTH+2, -1*IMAGE_WIDTH+3,
@@ -49,8 +49,27 @@ static const uint8_t wrap[28] = {
 };
 */
 
-bool FAST_init(void){
 
+static bool has12run(uint16_t x) {
+    uint16_t mask = 0x0FFF; // 12 bits
+
+    // circular trick (duplicate into 32-bit)
+    uint32_t ext = (uint32_t)((x << 16) | x);
+
+    for (int i = 0; i < 16; i++) {
+        if (((ext >> i) & mask) == mask)
+            return (true);
+    }
+    return (false);
+}
+
+static void init_consecutive_table(void) {
+    for (int i = 0; i < 65536; i++) {
+    	consecutive_LUT[i] = has12run((uint16_t)i);
+    }
+}
+bool FAST_init(void){
+	init_consecutive_table();
 
 	return true;
 }
@@ -185,18 +204,11 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 	}
 
 
-	uint32_t x = (uint32_t)((dark << 16) | dark);
-	uint32_t y = (uint32_t)((bright << 16) | bright);
-
-
-	for (int i = 1; i < 12; i++) {
-		x &= (x >> i);
-		y &= (y >> i);
+	if (consecutive_LUT[dark] || consecutive_LUT[bright]) {
+	    return (true);
 	}
-	if (x!=0 || y!=0) return (true);
 	return (false);
-	}
-
+}
 
 
 

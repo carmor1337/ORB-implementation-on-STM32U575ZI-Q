@@ -128,7 +128,7 @@ void output_table(int8_t idx, int stat){
 				COL_PART, time_profile->profiles_ms.label,
 				COL_NUM,  (double)time_profile->profiles_ms.min,
 				COL_NUM,  (double)time_profile->profiles_ms.max,
-				COL_NUM,  (double)time_profile->profiles_ms.max,
+				COL_NUM,  (double)time_profile->profiles_ms.avg,
 				COL_NUM,  (double)time_profile->profiles_ms.aggregate,
 				COL_NUM,  (double)time_profile->profiles_ms.aggregate/g_total_ms * g_convert_to_percent);
 			break;

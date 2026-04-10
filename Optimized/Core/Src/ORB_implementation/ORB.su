@@ -5,4 +5,3 @@
 ../Core/Src/ORB_implementation/ORB.c:83:6:get_ORB_patch	4	static
 ../Core/Src/ORB_implementation/ORB.c:98:6:ORB_extract_and_match	1016	static,ignoring_inline_asm
 ../Core/Src/ORB_implementation/ORB.c:172:6:send_benchmark_and_keypoints_uart	0	static
-../Core/Src/ORB_implementation/ORB.c:200:6:send_benchmark_and_keypoints_commit	200	static

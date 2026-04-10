@@ -47,3 +47,15 @@ int8_t DWT_Lookup(const char *key) {
     }
     return -1;
 }
+
+DWT_Map_t DWT_get_map(void){
+	return (dwt_map);
+}
+
+
+
+
+
+
+
+

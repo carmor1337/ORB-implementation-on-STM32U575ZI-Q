@@ -31,13 +31,14 @@
 /* USER CODE BEGIN Includes */
 
 #include "test_image.h"
-//#include "ORB.h"
+#include "ORB.h"
 #include "FAST.h"
 #include <string.h>
 #include "Benchmarking.h"
 #include "Benchmarking_map.h"
 #include "config.h"
 #include "common_includes.h"
+#include "output.h"
 
 /* USER CODE END Includes */
 
@@ -75,6 +76,36 @@ static void SystemPower_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+// Makes it so printf gets to the debugger terminal
+	int _write(int fd, char *ptr, int len) {
+		(void)fd;
+	    for (int i = 0; i < len; i++) {
+	        while (ITM->PORT[0].u32 == 0);  // wait until ready
+	        ITM->PORT[0].u8 = (uint8_t)ptr[i];
+	    }
+	    return (len);
+	}
+
+// In main.c, add these two functions
+void stack_paint(void) {
+	extern uint32_t _estack;
+	extern uint32_t _Min_Stack_Size;
+	uint32_t stack_bottom = (uint32_t)&_estack - (uint32_t)&_Min_Stack_Size;
+	uint32_t *p = (uint32_t*)stack_bottom;
+	while (p < (uint32_t*)__get_MSP())
+		*p++ = 0xDEADBEEF;
+}
+
+uint32_t stack_usage(void) {
+	extern uint32_t _estack;
+	extern uint32_t _Min_Stack_Size;
+	uint32_t stack_bottom = (uint32_t)&_estack - (uint32_t)&_Min_Stack_Size;
+	uint32_t *p = (uint32_t*)stack_bottom;
+	while (*p == 0xDEADBEEF) p++;
+	return (uint32_t)&_estack - (uint32_t)p;
+}
+
+
 /* USER CODE END 0 */
 
 /**
@@ -85,24 +116,69 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
+	stack_paint();
+
 
 	//CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
 	//DWT->CYCCNT = 0;
 	//DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 
+
 	DWT_init();
 	DWT_MapInit();
-	int8_t idx_fast_total = DWT_register("FAST: total");
-	int8_t idx_fast_circle = DWT_register("FAST: get circle");
-	int8_t idx_fast_HST = DWT_register("FAST: high speed test");
-	int8_t idx_fast_compute = DWT_register("FAST: compute and score");
-	int8_t idx_fast_inside = DWT_register("FAST: inside total");
+	int8_t idx_ORB_total =   DWT_register("ORB");
+#if ORB_PROFILING
+	int8_t idx_FAST_total=   DWT_register("FAST");
+	int8_t idx_HARRIS_total = DWT_register("Harris");
+	int8_t idx_Centroid_total = DWT_register("Centroid");
+	int8_t idx_rBRIEF_total = DWT_register("rBRIEF");
+
+	DEBUG_VAR(idx_FAST_total);
+    DEBUG_VAR(idx_HARRIS_total);
+    DEBUG_VAR(idx_Centroid_total);
+    DEBUG_VAR(idx_rBRIEF_total);
+#endif
+	// Fast profiles
+#if FAST_PROFILING
+	int8_t idx_FAST_HSP=   DWT_register("FAST: HST");
+	DEBUG_VAR(idx_FAST_HSP);
+#endif
+
+	// Harris profiles
+
+#if HARRIS_PROFILING
+	int8_t idx_HARRIS_compute_matrix = DWT_register("HARRIS:matrix");
+	DEBUG_VAR(idx_HARRIS_compute_matrix);
+#endif
+
+	// Centroid Profiles
+
+#if CENTROID_PROFILING
+	int8_t idx_Centroid_momentumsl = DWT_register("Centroid:m01,m10");
+	int8_t idx_Centroid_atan2 = DWT_register("Centroid:atan2");
+
+	DEBUG_VAR(idx_Centroid_momentumsl);
+	DEBUG_VAR(idx_Centroid_atan2);
+#endif
+
+	// rBRIEF profiles
+
+#if rBRIEF_PROFILING
+	int8_t idx_rBRIEF_rotation = DWT_register("rBRIEF:rotation");
+	int8_t idx_rBRIEF_sample = DWT_register("rBRIEF:sample");
+
+	DEBUG_VAR(idx_rBRIEF_rotation);
+	DEBUG_VAR(idx_rBRIEF_sample);
+#endif
+
+
 	// Trying to get the image into ram
-	static uint8_t image_ram[320*240];
+	static uint8_t image_ram[IMAGE_WIDTH * IMAGE_HEIGTH];
 	memcpy(image_ram, test_image, sizeof(image_ram));
 
 	static const int num_pixels = IMAGE_HEIGTH * IMAGE_WIDTH;
-
+	// Kitty dataset has 1241 x 376
+	static const int32_t kitti_num_pixels = 2341 * 376;
 
 
 
@@ -116,8 +192,8 @@ int main(void)
   /* USER CODE BEGIN Init */
 
   volatile uint32_t clock1 = HAL_RCC_GetHCLKFreq();
-    	printf("dummy %ld", clock1);
 
+   ORB_init(image_ram);
   /* USER CODE END Init */
 
   /* Configure the System Power */
@@ -171,10 +247,9 @@ int main(void)
   //HAL_StatusTypeDef clk_result = HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4);
   //printf(osc_result);
   volatile uint32_t clock2 = HAL_RCC_GetHCLKFreq();
-  	printf("dummy %ld", clock2);
 
-  	 FAST_init(test_image);
-  	 ORB_feature_point_t* feature_points =  FAST_get_feature_points();
+
+
   while (1)
   {
 
@@ -182,49 +257,63 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 	  BSP_LED_Toggle(LED_GREEN);
-	  HAL_Delay(500);
+	  HAL_Delay(LED_BLINK_WAIT);
 	  BSP_LED_Toggle(LED_RED);
-	  HAL_Delay(500);
-	  //uint32_t start = DWT->CYCCNT;
-	  DWT_start(idx_fast_total);
+	  HAL_Delay(LED_BLINK_WAIT);
 
-	  //volatile uint32_t cycles = DWT->CYCCNT - start;
-	  DWT_stop(idx_fast_total);
-	  //DWT_Profile_t profile_fast_total = *DWT_get(idx_fast_total);
-	  //DWT_profile_timed_t profile_fast_total_us = DWT_convert_cycles_to_us(idx_fast_total);
+	  DWT_start(idx_ORB_total);
+
+	  ORB_extract_and_match();
+
+	  DWT_stop(idx_ORB_total);
+
 	  DWT_convert_all_profiles_to_timed();
-	  DWT_timed_pair_t profiles_timed_total = 		   *DWT_get_timed(idx_fast_total);
-	  DWT_timed_pair_t profiles_timed_circle = 		   *DWT_get_timed(idx_fast_circle);
-	  DWT_timed_pair_t profiles_timed_HST =            *DWT_get_timed(idx_fast_HST);
-	  DWT_timed_pair_t profiles_timed_compute = 	   *DWT_get_timed(idx_fast_compute);
-	  DWT_timed_pair_t profiles_timed_compute_inside = *DWT_get_timed(idx_fast_inside);
+	  DWT_Profile_t *ORB_profile = DWT_get(idx_ORB_total);
+	  DWT_timed_pair_t *Orb_profile_timed =DWT_get_timed(idx_ORB_total);
 
-	  DWT_Profile_t profile_circle  = *DWT_get(idx_fast_circle);
-	  DWT_Registry_t regestry = DWT_get_registry();
-	  DWT_timed_pair_t* timed_reg =  DWT_get_timed_registry();
+#if ORB_PROFILING
+	  DWT_timed_pair_t *FAST_timed =DWT_get_timed(idx_FAST_total);
+	  DWT_timed_pair_t *HARRIS_timed =DWT_get_timed(idx_HARRIS_total);
+	  DWT_timed_pair_t *Centroid_timed =DWT_get_timed(idx_Centroid_total);
+	  DWT_timed_pair_t *rBRIEF_timed =DWT_get_timed(idx_rBRIEF_total);
+	  DWT_timed_pair_t *ORB_all_profiles_timed =DWT_get_timed_registry();
 
-	  DEBUG_VAR(idx_fast_total);
-	  DEBUG_VAR(idx_fast_circle);
-	  DEBUG_VAR(idx_fast_HST);
-	  DEBUG_VAR(idx_fast_compute);
-	  DEBUG_VAR(idx_fast_inside);
+	  DEBUG_VAR(ORB_all_profiles_timed);
+	  DEBUG_VAR(FAST_timed);
+	  DEBUG_VAR(HARRIS_timed);
+	  DEBUG_VAR(Centroid_timed);
+	  DEBUG_VAR(rBRIEF_timed);
+#endif
+	  double us_per_pixel = (int)ORB_profile->avg/num_pixels;
+	  us_per_pixel = us_per_pixel/(SystemCoreClock / 1000000.0);
+	  double kitti_time_us = us_per_pixel*kitti_num_pixels;
+	  const char feature_msg[] = "Added the functionality to get a message in the SWV viewer with measurements. Primary use will be benchmarking and commit messages";
+	  const char performance_msg[] = "Broke the output messages into its own file to keep things clean";
+	  output_commit_message(feature_msg,performance_msg );
+
+	  uint32_t used = stack_usage();
+	  DWT_aggregate_reset_all();
+
+	  DEBUG_VAR(idx_ORB_total);
 
 
-	  //DEBUG_VAR(profile_fast_total);
-	  //DEBUG_VAR(profile_fast_total_us);
-	  DEBUG_VAR(profiles_timed_total);
-	  DEBUG_VAR(profiles_timed_circle);
-	  DEBUG_VAR(profiles_timed_HST);
-	  DEBUG_VAR(profiles_timed_compute);
-	  DEBUG_VAR(profiles_timed_compute_inside);
-	  DEBUG_VAR(profile_circle );
+	  DEBUG_VAR(ORB_profile);
+	  DEBUG_VAR(Orb_profile_timed);
 
-	  DEBUG_VAR(regestry);
-	  DEBUG_VAR(timed_reg );
 
 	  DEBUG_VAR(num_pixels);
-	  DEBUG_VAR(feature_points);
+	  DEBUG_VAR(kitti_num_pixels);
+	  DEBUG_VAR(kitti_time_us);
 
+
+	  DEBUG_VAR(clock1);
+	  DEBUG_VAR(clock2);
+	  DEBUG_VAR(used);
+	  DEBUG_VAR(Orb_profile_timed);
+	  DEBUG_VAR(Orb_profile_timed);
+	  DEBUG_VAR(ORB_profile);
+	  DEBUG_VAR(Orb_profile_timed);
+	  DEBUG_VAR(Orb_profile_timed);
 
 	  /*
 	  uint32_t microseconds = cycles / (SystemCoreClock / 1000000U);

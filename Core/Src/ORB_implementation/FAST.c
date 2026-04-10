@@ -32,13 +32,6 @@
  */
 
 
-#define PROFILING 0
-
-
-
-
-
-
 
 static const int32_t CIRCLE_OFFSETS[16] = {
 	    -3*IMAGE_WIDTH+0, -3*IMAGE_WIDTH+1, -2*IMAGE_WIDTH+2, -1*IMAGE_WIDTH+3,
@@ -55,7 +48,7 @@ static const uint8_t wrap[28] = {
 };
 
 
-bool FAST_init(uint8_t *image_start){
+bool FAST_init(void){
 
 
 	return true;
@@ -160,14 +153,14 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 
 	// High speed test
 	// Check pixels 1,5,9,13 (paper notation) = indices 0,4,8,12 (0-based)
-#if PROFILING
-	DWT_start(DWT_Lookup("FAST: high speed test"));
+#if FAST_PROFILING
+	DWT_start(DWT_Lookup("FAST: HST"));
 #endif
 
 	if ( __builtin_expect(FAST_high_speed_test(&pixels, pixel_result, &score) == false, 1)) return false;
 
-#if PROFILING
-	DWT_stop(DWT_Lookup("FAST: high speed test"));
+#if FAST_PROFILING
+	DWT_stop(DWT_Lookup("FAST: HST"));
 #endif
 
 

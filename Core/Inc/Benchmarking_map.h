@@ -26,6 +26,6 @@ extern DWT_Map_t dwt_map;
 void   DWT_MapInit(void);
 void   DWT_MapInsert(const char *key, int8_t idx);
 int8_t DWT_Lookup(const char *key);  // Returns -1 if not found
-
+DWT_Map_t DWT_get_map(void);
 
 #endif /* INC_ORB_BENCHMARKING_MAP_H_ */

@@ -1,6 +1,2 @@
-../Core/Src/ORB_implementation/FAST.c:55:6:FAST_assign_image	0	static
-../Core/Src/ORB_implementation/FAST.c:70:6:FAST_init	8	static
-../Core/Src/ORB_implementation/FAST.c:306:13:FAST_detect	104	static
-../Core/Src/ORB_implementation/FAST.c:353:6:get_prev_feature_coords	0	static
-../Core/Src/ORB_implementation/FAST.c:362:10:FAST_get_feature_count	0	static
-../Core/Src/ORB_implementation/FAST.c:366:22:FAST_get_feature_points	0	static
+../Core/Src/ORB_implementation/FAST.c:51:6:FAST_init	0	static
+../Core/Src/ORB_implementation/FAST.c:142:27:FAST_detect	56	static

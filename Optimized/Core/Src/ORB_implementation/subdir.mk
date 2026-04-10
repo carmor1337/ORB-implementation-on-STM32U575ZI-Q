@@ -12,6 +12,10 @@ C_SRCS += \
 ../Core/Src/ORB_implementation/Harris_corner_detection.c \
 ../Core/Src/ORB_implementation/Non_maximum_supression.c \
 ../Core/Src/ORB_implementation/ORB.c \
+../Core/Src/ORB_implementation/Orientation.c \
+../Core/Src/ORB_implementation/common_func.c \
+../Core/Src/ORB_implementation/min_heap.c \
+../Core/Src/ORB_implementation/output.c \
 ../Core/Src/ORB_implementation/rBrief.c 
 
 OBJS += \
@@ -22,6 +26,10 @@ OBJS += \
 ./Core/Src/ORB_implementation/Harris_corner_detection.o \
 ./Core/Src/ORB_implementation/Non_maximum_supression.o \
 ./Core/Src/ORB_implementation/ORB.o \
+./Core/Src/ORB_implementation/Orientation.o \
+./Core/Src/ORB_implementation/common_func.o \
+./Core/Src/ORB_implementation/min_heap.o \
+./Core/Src/ORB_implementation/output.o \
 ./Core/Src/ORB_implementation/rBrief.o 
 
 C_DEPS += \
@@ -32,6 +40,10 @@ C_DEPS += \
 ./Core/Src/ORB_implementation/Harris_corner_detection.d \
 ./Core/Src/ORB_implementation/Non_maximum_supression.d \
 ./Core/Src/ORB_implementation/ORB.d \
+./Core/Src/ORB_implementation/Orientation.d \
+./Core/Src/ORB_implementation/common_func.d \
+./Core/Src/ORB_implementation/min_heap.d \
+./Core/Src/ORB_implementation/output.d \
 ./Core/Src/ORB_implementation/rBrief.d 
 
 
@@ -42,7 +54,7 @@ Core/Src/ORB_implementation/%.o Core/Src/ORB_implementation/%.su Core/Src/ORB_im
 clean: clean-Core-2f-Src-2f-ORB_implementation
 
 clean-Core-2f-Src-2f-ORB_implementation:
-	-$(RM) ./Core/Src/ORB_implementation/Benchmarking.cyclo ./Core/Src/ORB_implementation/Benchmarking.d ./Core/Src/ORB_implementation/Benchmarking.o ./Core/Src/ORB_implementation/Benchmarking.su ./Core/Src/ORB_implementation/Benchmarking_map.cyclo ./Core/Src/ORB_implementation/Benchmarking_map.d ./Core/Src/ORB_implementation/Benchmarking_map.o ./Core/Src/ORB_implementation/Benchmarking_map.su ./Core/Src/ORB_implementation/FAST.cyclo ./Core/Src/ORB_implementation/FAST.d ./Core/Src/ORB_implementation/FAST.o ./Core/Src/ORB_implementation/FAST.su ./Core/Src/ORB_implementation/Feature_matching.cyclo ./Core/Src/ORB_implementation/Feature_matching.d ./Core/Src/ORB_implementation/Feature_matching.o ./Core/Src/ORB_implementation/Feature_matching.su ./Core/Src/ORB_implementation/Harris_corner_detection.cyclo ./Core/Src/ORB_implementation/Harris_corner_detection.d ./Core/Src/ORB_implementation/Harris_corner_detection.o ./Core/Src/ORB_implementation/Harris_corner_detection.su ./Core/Src/ORB_implementation/Non_maximum_supression.cyclo ./Core/Src/ORB_implementation/Non_maximum_supression.d ./Core/Src/ORB_implementation/Non_maximum_supression.o ./Core/Src/ORB_implementation/Non_maximum_supression.su ./Core/Src/ORB_implementation/ORB.cyclo ./Core/Src/ORB_implementation/ORB.d ./Core/Src/ORB_implementation/ORB.o ./Core/Src/ORB_implementation/ORB.su ./Core/Src/ORB_implementation/rBrief.cyclo ./Core/Src/ORB_implementation/rBrief.d ./Core/Src/ORB_implementation/rBrief.o ./Core/Src/ORB_implementation/rBrief.su
+	-$(RM) ./Core/Src/ORB_implementation/Benchmarking.cyclo ./Core/Src/ORB_implementation/Benchmarking.d ./Core/Src/ORB_implementation/Benchmarking.o ./Core/Src/ORB_implementation/Benchmarking.su ./Core/Src/ORB_implementation/Benchmarking_map.cyclo ./Core/Src/ORB_implementation/Benchmarking_map.d ./Core/Src/ORB_implementation/Benchmarking_map.o ./Core/Src/ORB_implementation/Benchmarking_map.su ./Core/Src/ORB_implementation/FAST.cyclo ./Core/Src/ORB_implementation/FAST.d ./Core/Src/ORB_implementation/FAST.o ./Core/Src/ORB_implementation/FAST.su ./Core/Src/ORB_implementation/Feature_matching.cyclo ./Core/Src/ORB_implementation/Feature_matching.d ./Core/Src/ORB_implementation/Feature_matching.o ./Core/Src/ORB_implementation/Feature_matching.su ./Core/Src/ORB_implementation/Harris_corner_detection.cyclo ./Core/Src/ORB_implementation/Harris_corner_detection.d ./Core/Src/ORB_implementation/Harris_corner_detection.o ./Core/Src/ORB_implementation/Harris_corner_detection.su ./Core/Src/ORB_implementation/Non_maximum_supression.cyclo ./Core/Src/ORB_implementation/Non_maximum_supression.d ./Core/Src/ORB_implementation/Non_maximum_supression.o ./Core/Src/ORB_implementation/Non_maximum_supression.su ./Core/Src/ORB_implementation/ORB.cyclo ./Core/Src/ORB_implementation/ORB.d ./Core/Src/ORB_implementation/ORB.o ./Core/Src/ORB_implementation/ORB.su ./Core/Src/ORB_implementation/Orientation.cyclo ./Core/Src/ORB_implementation/Orientation.d ./Core/Src/ORB_implementation/Orientation.o ./Core/Src/ORB_implementation/Orientation.su ./Core/Src/ORB_implementation/common_func.cyclo ./Core/Src/ORB_implementation/common_func.d ./Core/Src/ORB_implementation/common_func.o ./Core/Src/ORB_implementation/common_func.su ./Core/Src/ORB_implementation/min_heap.cyclo ./Core/Src/ORB_implementation/min_heap.d ./Core/Src/ORB_implementation/min_heap.o ./Core/Src/ORB_implementation/min_heap.su ./Core/Src/ORB_implementation/output.cyclo ./Core/Src/ORB_implementation/output.d ./Core/Src/ORB_implementation/output.o ./Core/Src/ORB_implementation/output.su ./Core/Src/ORB_implementation/rBrief.cyclo ./Core/Src/ORB_implementation/rBrief.d ./Core/Src/ORB_implementation/rBrief.o ./Core/Src/ORB_implementation/rBrief.su
 
 .PHONY: clean-Core-2f-Src-2f-ORB_implementation
 

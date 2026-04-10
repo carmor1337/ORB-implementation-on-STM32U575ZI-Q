@@ -30,7 +30,7 @@ typedef enum{
 
 
 
-bool FAST_init(uint8_t *image_start);
+bool FAST_init(void);
 
 
 bool FAST_assign_image(uint8_t *image_start);

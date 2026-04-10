@@ -9,6 +9,8 @@ static DWT_Registry_t dwt_registry;
 
 static DWT_timed_pair_t dwt_timed_registry[DWT_MAX_PROFILES];
 
+uint16_t profile_count = 0;
+
 // Call once at startup
 void DWT_init(void) {
     CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
@@ -23,21 +25,25 @@ void DWT_init(void) {
         dwt_registry.profiles[i].avg       = 0;
         dwt_registry.profiles[i].runs      = 0;
         dwt_registry.profiles[i].aggregate = 0;
+        //dwt_registry.profiles[i].load_store_stalls = 0;
     }
 
 }
 
 // Returns index, or -1 if registry is full
 int8_t DWT_register(const char *label) {
-    if (dwt_registry.count >= DWT_MAX_PROFILES) return -1;
+    if (dwt_registry.count >= DWT_MAX_PROFILES) return (-1);
     int8_t idx = (int8_t)dwt_registry.count++;
     dwt_registry.profiles[idx].label = label;
     DWT_MapInsert(label, idx);
-    return (int8_t)idx;
+    profile_count++;
+    return ((int8_t)idx);
 }
 
 void DWT_start(int8_t idx) {
+
     dwt_registry.profiles[idx].start = DWT->CYCCNT;
+
 }
 
 void DWT_stop(int8_t idx) {
@@ -52,13 +58,20 @@ void DWT_stop(int8_t idx) {
 
 // Get a pointer to a profile by index
 DWT_Profile_t *DWT_get(int8_t idx) {
-    return &dwt_registry.profiles[idx];
+    return (&dwt_registry.profiles[idx]);
+}
+
+
+
+DWT_timed_pair_t *DWT_get_timed(int8_t idx){
+	 return (&dwt_timed_registry[idx]);
 }
 
 DWT_profile_timed_t DWT_convert_cycles_to_us(int8_t idx){
 	DWT_Profile_t *p = &dwt_registry.profiles[idx];
 	DWT_profile_timed_t profile_us;
-	uint32_t clock_factor =  (SystemCoreClock / 1000000U);
+	double clock_factor =  (SystemCoreClock / 1000000.0);
+	profile_us.label = p->label;
 	profile_us.min = p->min/ clock_factor;
 	profile_us.max = p->max/ clock_factor;
 	profile_us.avg = p->avg/ clock_factor;
@@ -71,7 +84,8 @@ DWT_profile_timed_t DWT_convert_cycles_to_ms(int8_t idx){
 
 	DWT_Profile_t *p = &dwt_registry.profiles[idx];
 	DWT_profile_timed_t profile_ms;
-	uint32_t clock_factor =  (SystemCoreClock / 1000U);
+	double clock_factor =  (SystemCoreClock / 1000.0);
+	profile_ms.label = p->label;
 	profile_ms.min = p->min/ clock_factor;
 	profile_ms.max = p->max/ clock_factor;
 	profile_ms.avg = p->avg/ clock_factor;
@@ -85,6 +99,12 @@ void DWT_aggregate_reset(int8_t idx){
 	DWT_Profile_t *p = &dwt_registry.profiles[idx];
 	p->aggregate = 0;
 }
+// Resets all the aggregates for the profiles
+void DWT_aggregate_reset_all(void){
+	for (int8_t i = 0; i < dwt_registry.count; i++){
+			dwt_registry.profiles[i].aggregate = 0;
+		}
+}
 
 
 void DWT_reset(int8_t idx){
@@ -97,19 +117,24 @@ void DWT_reset(int8_t idx){
 	p->runs      = 0;
 	p->aggregate = 0;
 }
-DWT_Registry_t DWT_get_registry(void){
-	return dwt_registry;
+
+DWT_Registry_t* DWT_get_registry(void){
+	return (&dwt_registry);
 }
 
-DWT_timed_pair_t *DWT_get_timed_registry(void){
-	return dwt_timed_registry;
+uint16_t DWT_get_profile_count(void){
+	return (profile_count);
+}
+
+DWT_timed_pair_t* DWT_get_timed_registry(void){
+	return (dwt_timed_registry);
 }
 
 DWT_timed_pair_t DWT_convert_to_timed(int8_t idx){
 	DWT_timed_pair_t res;
 	res.profiles_us = DWT_convert_cycles_to_us(idx);
 	res.profiles_ms = DWT_convert_cycles_to_ms(idx);
-	return res;
+	return (res);
 }
 
 void DWT_convert_all_profiles_to_timed(void){
@@ -118,6 +143,3 @@ void DWT_convert_all_profiles_to_timed(void){
 	}
 }
 
-DWT_timed_pair_t *DWT_get_timed(int8_t idx){
-	 return &dwt_timed_registry[idx];
-}

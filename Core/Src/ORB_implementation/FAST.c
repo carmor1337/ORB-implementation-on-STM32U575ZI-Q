@@ -191,7 +191,16 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 												   ((uint32_t)origin_value_minus_threshold <<  8) |
 												   ((uint32_t)origin_value_minus_threshold <<  0);
 
-	// High speed test
+	//
+	    /*
+	     ********************************************************
+	     *													    *
+	     *				   High Speed Test					    *
+	     *													    *
+	     ********************************************************
+	     *
+	     *
+	     */
 	// Check pixels 1,5,9,13 (paper notation) = indices 0,4,8,12 (0-based)
 #if FAST_PROFILING
 	DWT_start(DWT_Lookup("FAST: HST"));
@@ -209,13 +218,13 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 	uint32_t bright_result = __SEL(0x01010101, 0);
 	bool is_bright = __builtin_popcount(bright_result) >= 3;
 
-	if (!is_bright){
+	if (__builtin_expect(is_bright == 0, 1)){
 
 		__USUB8(origin_value_minus_threshold_packed , high_speed_test_packed);
 		uint32_t dark_result = __SEL(0x01010101, 0);
 		bool is_dark = __builtin_popcount(dark_result) >= 3;
-		if(!is_dark) {
-			g_high_speed_test_rejections +=1;
+		if((__builtin_expect(is_dark == 0, 1))) {
+			//g_high_speed_test_rejections +=1;
 			return (false);
 		}
 		bright_or_dark = 0;
@@ -231,7 +240,15 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 	DWT_stop(DWT_Lookup("FAST: HST"));
 #endif
 	//
-    //#pragma unroll
+    /*
+     ********************************************************
+     *													    *
+     *				All pixel threshold caluclations        *
+     *													    *
+     ********************************************************
+     *
+     *
+     */
 	// Start from index 1 (pixel 2) since high speed test gets the 1,5,9,13 pixels
 	uint16_t result = 0;
 
@@ -276,8 +293,17 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 	          ((uint16_t)((temp_result >>  8) & 0xFF) << 15);
 
 
+	/*
+	 ********************************************************
+	 *													    *
+	 *				Checking 12 consecutive bits	        *
+	 *													    *
+	 ********************************************************
+	 *
+	 *
+	 */
 	uint32_t x = ((uint32_t)result << 16) | result;
-
+//#pragma GCC unroll 12
 	for (int i = 0; i < 11; i++) {
 			x &= (x >> 1);
 		}

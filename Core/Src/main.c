@@ -297,7 +297,7 @@ int main(void)
 	  us_per_pixel = us_per_pixel/(SystemCoreClock / 1000000.0);
 	  double kitti_time_us = us_per_pixel*kitti_num_pixels;
 	  const char feature_msg[] = "None";
-	  const char performance_msg[] = "Fixed a overflow bug in calculating the packed threshold values. Also fixed the extra bit check in the consecutive check";
+	  const char performance_msg[] = "Added __restrict__ on the orb_obj->image and shifted to the current pixel index. Changed the fetching of values to match the pixel index change";
 	  output_commit_message(feature_msg,performance_msg );
 
 	  uint32_t used = stack_usage();

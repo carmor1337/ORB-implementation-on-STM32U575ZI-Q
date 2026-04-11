@@ -161,24 +161,15 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 	// decide to append point if not
 	// 16 comes from the number of pixels to compare with
 
-
-#if FAST_PROFILING
-	DWT_start(DWT_Lookup("FAST: Circle"));
-#endif
-
 	int32_t idx = (int32_t)orb_obj->pixel_index;
+	const uint8_t * __restrict__ img = orb_obj->image + idx;
 
 
 
 
 
-#if FAST_PROFILING
-	DWT_start(DWT_Lookup("FAST: Circle"));
-#endif
-
-
-
-	uint8_t origin_value = orb_obj->image[idx];
+	uint8_t origin_value = img[0];
+	//uint8_t origin_value = orb_obj->image[idx];
 	// Clamping to avid overflows
 	uint8_t origin_value_plus_threshold = (origin_value + ILLUMINATION_THRESHOLD > 255)
 	                                       ? 255
@@ -215,10 +206,17 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 #endif
 	bool bright_or_dark = 0; // 1 for bright and 0 for dark
 	uint32_t high_speed_test_result = 0;
-	uint32_t high_speed_test_packed =((uint32_t)(orb_obj->image[idx + CIRCLE_OFFSETS[0]]) << 24) |
-									 ((uint32_t)(orb_obj->image[idx + CIRCLE_OFFSETS[4]]) << 16) |
-									 ((uint32_t)orb_obj->image[idx + CIRCLE_OFFSETS[8]]   <<  8) |
-									 ((uint32_t)orb_obj->image[idx + CIRCLE_OFFSETS[12]]  <<  0);
+	uint32_t high_speed_test_packed =((uint32_t)img[CIRCLE_OFFSETS[0]]  << 24) |
+									 ((uint32_t)img[CIRCLE_OFFSETS[4]]  << 16) |
+									 ((uint32_t)img[CIRCLE_OFFSETS[8]]  <<  8) |
+									 ((uint32_t)img[CIRCLE_OFFSETS[12]] <<  0);
+	/*
+
+	uint32_t high_speed_test_packed =((uint32_t)orb_obj->image[idx + CIRCLE_OFFSETS[0]] << 24) |
+										 ((uint32_t)orb_obj->image[idx + CIRCLE_OFFSETS[4]]  << 16) |
+										 ((uint32_t)orb_obj->image[idx + CIRCLE_OFFSETS[8]]  <<  8) |
+			 							 ((uint32_t)orb_obj->image[idx + CIRCLE_OFFSETS[12]] <<  0);
+ */
 	// Checking if greater than
 	// __USUBB8 Sets the bits in a register that __SEL then reads from and gets the greater than values
 	// __USUB8 is used because it can never underflow, while __UADD8 can overflow
@@ -266,10 +264,16 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 			 ((uint16_t)((high_speed_test_result >> 0)  & 0xFF) << 12);
 
 	for (int i = 1; i < 9; i += 4){
+		/*
 		uint32_t packed =((uint32_t)orb_obj->image[idx + CIRCLE_OFFSETS[i]]   << 24) |
 						 ((uint32_t)orb_obj->image[idx + CIRCLE_OFFSETS[i+1]] << 16) |
 						 ((uint32_t)orb_obj->image[idx + CIRCLE_OFFSETS[i+2]] <<  8) |
 						 ((uint32_t)orb_obj->image[idx + CIRCLE_OFFSETS[i+3]] <<  0);
+						 */
+		uint32_t packed =((uint32_t)img[CIRCLE_OFFSETS[i]]   << 24) |
+						 ((uint32_t)img[CIRCLE_OFFSETS[i+1]] << 16) |
+						 ((uint32_t)img[CIRCLE_OFFSETS[i+2]] <<  8) |
+						 ((uint32_t)img[CIRCLE_OFFSETS[i+3]] <<  0);
 		if (bright_or_dark){
 			__USUB8(packed, origin_value_plus_threshold_packed);
 		}
@@ -285,9 +289,9 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 	}
 	// Last 3 pixels (13, 14, 15) — packed with 0 as dummy 4th byte
 	uint32_t packed_last =
-	    ((uint32_t)orb_obj->image[idx + CIRCLE_OFFSETS[13]] << 24) |
-	    ((uint32_t)orb_obj->image[idx + CIRCLE_OFFSETS[14]] << 16) |
-	    ((uint32_t)orb_obj->image[idx + CIRCLE_OFFSETS[15]] <<  8) |
+	    ((uint32_t)img[CIRCLE_OFFSETS[13]] << 24) |
+	    ((uint32_t)img[CIRCLE_OFFSETS[14]] << 16) |
+	    ((uint32_t)img[CIRCLE_OFFSETS[15]] <<  8) |
 	    0;  // dummy byte, result discarded
 
 	if (bright_or_dark)
@@ -311,13 +315,6 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 	 *
 	 */
 	uint32_t x = ((uint32_t)result << 16) | result;
-/*
-	for (int i = 0; i < 11; i++) {
-			x &= (x >> 1);
-		}
-
-
-*/
 
 	// Loop unrolling
 	x &= (x >> 1);

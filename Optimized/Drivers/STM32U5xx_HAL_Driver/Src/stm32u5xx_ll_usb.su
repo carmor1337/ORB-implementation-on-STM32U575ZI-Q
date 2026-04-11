@@ -3,9 +3,9 @@
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_ll_usb.c:221:19:USB_EnableGlobalInt	0	static
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_ll_usb.c:233:19:USB_DisableGlobalInt	0	static
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_ll_usb.c:248:19:USB_SetCurrentMode	16	static
+../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_ll_usb.c:295:19:USB_DevInit	32	static
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_ll_usb.c:473:19:USB_FlushTxFifo	8	static
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_ll_usb.c:510:19:USB_FlushRxFifo	8	static
-../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_ll_usb.c:295:19:USB_DevInit	24	static
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_ll_usb.c:553:19:USB_SetDevSpeed	0	static
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_ll_usb.c:569:9:USB_GetDevSpeed	0	static
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_ll_usb.c:599:19:USB_ActivateEndpoint	8	static

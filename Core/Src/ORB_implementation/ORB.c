@@ -67,7 +67,7 @@ bool ORB_init(uint8_t *image_start){
 
 static bool append_feature_point(uint16_t x, uint16_t y, float score ){
 	if (g_feature_count >= MAX_FEATURE_POINTS) {
-		__BKPT(0);
+		//__BKPT(0);
 			return (false);
 		}
 

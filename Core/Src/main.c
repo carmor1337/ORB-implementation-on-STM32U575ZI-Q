@@ -40,6 +40,7 @@
 #include "common_includes.h"
 #include "output.h"
 
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -77,7 +78,7 @@ static void SystemPower_Config(void);
 /* USER CODE BEGIN 0 */
 
 // Makes it so printf gets to the debugger terminal
-	int _write(int fd, char *ptr, int len) {
+__attribute__((used))	int _write(int fd, char *ptr, int len) {
 		(void)fd;
 	    for (int i = 0; i < len; i++) {
 	        while (ITM->PORT[0].u32 == 0);  // wait until ready
@@ -249,9 +250,15 @@ int main(void)
   //HAL_StatusTypeDef clk_result = HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4);
   //printf(osc_result);
   volatile uint32_t clock2 = HAL_RCC_GetHCLKFreq();
+  // SIMD here we gooooo
+  uint8_t b0 = 1;
+  uint8_t b1 = 2;
+  uint8_t b2 = 3;
+  uint8_t b3 = 4;
 
-
-
+  uint32_t packed8 = ((uint32_t)b3 << 24) | ((uint32_t)b2 << 16)
+                   | ((uint32_t)b1 <<  8) | b0;
+  uint32_t val = __UADD8(packed8,packed8);
   while (1)
   {
 
@@ -311,7 +318,7 @@ int main(void)
 	  DEBUG_VAR(clock1);
 	  DEBUG_VAR(clock2);
 	  DEBUG_VAR(used);
-	  DEBUG_VAR(Orb_profile_timed);
+	  DEBUG_VAR(val);
 	  DEBUG_VAR(Orb_profile_timed);
 	  DEBUG_VAR(ORB_profile);
 	  DEBUG_VAR(Orb_profile_timed);

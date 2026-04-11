@@ -1,5 +1,4 @@
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_dcache.c:282:13:HAL_DCACHE_MspInit	0	static
-../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_dcache.c:1404:26:DCACHE_CommandByAddr	16	static
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_dcache.c:1326:13:HAL_DCACHE_ErrorCallback	0	static
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_dcache.c:298:13:HAL_DCACHE_MspDeInit	0	static
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_dcache.c:1262:13:HAL_DCACHE_CleanByAddrCallback	0	static
@@ -7,9 +6,9 @@
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_dcache.c:1294:13:HAL_DCACHE_CleanAndInvalidateByAddrCallback	0	static
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_dcache.c:1310:13:HAL_DCACHE_InvalidateCompleteCallback	0	static
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_dcache.c:181:20:HAL_DCACHE_Init	8	static
+../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_dcache.c:234:19:HAL_DCACHE_DeInit	16	static
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_dcache.c:346:19:HAL_DCACHE_Enable	0	static
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_dcache.c:383:19:HAL_DCACHE_Disable	16	static
-../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_dcache.c:234:19:HAL_DCACHE_DeInit	16	static
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_dcache.c:442:10:HAL_DCACHE_IsEnabled	0	static
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_dcache.c:455:19:HAL_DCACHE_SetReadBurstType	4	static
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_dcache.c:494:19:HAL_DCACHE_Invalidate	16	static

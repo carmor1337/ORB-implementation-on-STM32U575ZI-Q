@@ -18,6 +18,8 @@
 #include "Benchmarking.h"
 #include "Benchmarking_map.h"
 
+// Link to site which has how to add the DSP lib
+// https://community.st.com/t5/stm32-mcus/how-to-integrate-cmsis-dsp-libraries-on-a-stm32-project/ta-p/666790
 /*  Fast algorithm
  *
  * 	For every pixel
@@ -31,7 +33,15 @@
  *
  */
 
-static uint8_t consecutive_LUT[65536];
+#ifndef __ARM_FEATURE_DSP
+  #error "DSP extension not enabled! Add -march=armv8-m.main+dsp to compiler flags"
+#endif
+
+#ifndef __ARM_ARCH_8M_MAIN__
+  #error "Wrong architecture detected - should be ARMv8-M Main"
+#endif
+
+volatile uint32_t g_high_speed_test_rejections = 0;
 
 static const int32_t CIRCLE_OFFSETS[16] = {
 	    -3*IMAGE_WIDTH+0, -3*IMAGE_WIDTH+1, -2*IMAGE_WIDTH+2, -1*IMAGE_WIDTH+3,
@@ -50,26 +60,10 @@ static const uint8_t wrap[28] = {
 */
 
 
-static bool has12run(uint16_t x) {
-    uint16_t mask = 0x0FFF; // 12 bits
 
-    // circular trick (duplicate into 32-bit)
-    uint32_t ext = (uint32_t)((x << 16) | x);
 
-    for (int i = 0; i < 16; i++) {
-        if (((ext >> i) & mask) == mask)
-            return (true);
-    }
-    return (false);
-}
-
-static void init_consecutive_table(void) {
-    for (int i = 0; i < 65536; i++) {
-    	consecutive_LUT[i] = has12run((uint16_t)i);
-    }
-}
 bool FAST_init(void){
-	init_consecutive_table();
+	//init_consecutive_table();
 
 	return true;
 }
@@ -159,120 +153,137 @@ __attribute__((hot)) static inline bool FAST_high_speed_test(FAST_circle_t *pixe
 
 
 
+
+
 __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 	// Compute 16 points and score
 	// Use the counters here
 	// decide to append point if not
 	// 16 comes from the number of pixels to compare with
-	FAST_circle_t pixels;
-#if FAST_PROFILING
-	DWT_start(DWT_Lookup("FAST: Circle"));
-#endif
 
-	FAST_get_circle(orb_obj, &pixels);
 
 #if FAST_PROFILING
 	DWT_start(DWT_Lookup("FAST: Circle"));
 #endif
-	uint8_t origin = pixels.pixel;
-	uint32_t score = 0;
 
-	FAST_pixel_class_t pixel_result[16];
+	int32_t idx = (int32_t)orb_obj->pixel_index;
+
+
+
+
+
+#if FAST_PROFILING
+	DWT_start(DWT_Lookup("FAST: Circle"));
+#endif
+
+
+
+	uint8_t origin_value = orb_obj->image[idx];
+	uint8_t origin_value_plus_threshold  =  origin_value + ILLUMINATION_THRESHOLD;
+	uint8_t origin_value_minus_threshold =  origin_value - ILLUMINATION_THRESHOLD;
+	uint32_t origin_value_plus_threshold_packed = ((uint32_t)origin_value_plus_threshold << 24) |
+												  ((uint32_t)origin_value_plus_threshold << 16) |
+												  ((uint32_t)origin_value_plus_threshold <<  8) |
+												  ((uint32_t)origin_value_plus_threshold <<  0);
+
+	uint32_t origin_value_minus_threshold_packed = ((uint32_t)origin_value_minus_threshold << 24) |
+												   ((uint32_t)origin_value_minus_threshold << 16) |
+												   ((uint32_t)origin_value_minus_threshold <<  8) |
+												   ((uint32_t)origin_value_minus_threshold <<  0);
 
 	// High speed test
 	// Check pixels 1,5,9,13 (paper notation) = indices 0,4,8,12 (0-based)
 #if FAST_PROFILING
 	DWT_start(DWT_Lookup("FAST: HST"));
 #endif
+	bool bright_or_dark = 0; // 1 for bright and 0 for dark
+	uint32_t high_speed_test_result = 0;
+	uint32_t high_speed_test_packed =((uint32_t)(orb_obj->image[idx + CIRCLE_OFFSETS[0]]) << 24) |
+									 ((uint32_t)(orb_obj->image[idx + CIRCLE_OFFSETS[4]]) << 16) |
+									 ((uint32_t)orb_obj->image[idx + CIRCLE_OFFSETS[8]]   <<  8) |
+									 ((uint32_t)orb_obj->image[idx + CIRCLE_OFFSETS[12]]  <<  0);
+	// Checking if greater than
+	// __USUBB8 Sets the bits in a register that __SEL then reads from and gets the greater than values
+	// __USUB8 is used because it can never underflow, while __UADD8 can overflow
+	__USUB8(high_speed_test_packed,origin_value_plus_threshold_packed);
+	uint32_t bright_result = __SEL(0x01010101, 0);
+	bool is_bright = __builtin_popcount(bright_result) >= 3;
 
-	if ( __builtin_expect(FAST_high_speed_test(&pixels, pixel_result, &score) == false, 1)) return false;
+	if (!is_bright){
+
+		__USUB8(origin_value_minus_threshold_packed , high_speed_test_packed);
+		uint32_t dark_result = __SEL(0x01010101, 0);
+		bool is_dark = __builtin_popcount(dark_result) >= 3;
+		if(!is_dark) {
+			g_high_speed_test_rejections +=1;
+			return (false);
+		}
+		bright_or_dark = 0;
+		high_speed_test_result = dark_result;
+	}
+	else{
+
+	bright_or_dark = 1;
+	high_speed_test_result = bright_result;
+	}
 
 #if FAST_PROFILING
 	DWT_stop(DWT_Lookup("FAST: HST"));
 #endif
+	//
+    //#pragma unroll
+	// Start from index 1 (pixel 2) since high speed test gets the 1,5,9,13 pixels
+	uint16_t result = 0;
 
-	uint16_t dark   = 0x0;
-	uint16_t bright = 0x0;
-	// Optimization is to do a bit shift check
-	for (int i = 0; i < 16 ; i++){
-		uint8_t c = pixels.circle[i];
-		bool brighter = (c > origin) && ((c - origin) > ILLUMINATION_THRESHOLD);
-		bool darker   = (origin > c) && ((origin - c) > ILLUMINATION_THRESHOLD);
-		// Each bit represent if the pixel differance was greater than the threshold
-		dark   |= (darker   << i);
-		bright |= (brighter << i);
+	result = ((uint16_t)((high_speed_test_result >> 24) & 0xFF) << 0) |
+			 ((uint16_t)((high_speed_test_result >> 16) & 0xFF) << 4) |
+			 ((uint16_t)((high_speed_test_result >> 8)  & 0xFF) << 8) |
+			 ((uint16_t)((high_speed_test_result >> 0)  & 0xFF) << 12);
+
+	for (int i = 1; i < 9; i += 4){
+		uint32_t packed =((uint32_t)orb_obj->image[idx + CIRCLE_OFFSETS[i]]   << 24) |
+						 ((uint32_t)orb_obj->image[idx + CIRCLE_OFFSETS[i+1]] << 16) |
+						 ((uint32_t)orb_obj->image[idx + CIRCLE_OFFSETS[i+2]] <<  8) |
+						 ((uint32_t)orb_obj->image[idx + CIRCLE_OFFSETS[i+3]] <<  0);
+		if (bright_or_dark){
+			__USUB8(packed, origin_value_plus_threshold_packed);
+		}
+		else if(!bright_or_dark){
+			__USUB8(origin_value_minus_threshold_packed, packed);
+		}
+			uint32_t temp_result = __SEL(0x01010101, 0);
+			// Need to get the relevant bits in result to their respective position
+			result |= ((uint16_t)((temp_result >> 24) & 0xFF) << i   ) |
+					 ((uint16_t)((temp_result >> 16) & 0xFF) <<(i+1)) |
+					 ((uint16_t)((temp_result >> 8)  & 0xFF) <<(i+2)) |
+					 ((uint16_t)((temp_result >> 0)  & 0xFF) <<(i+3));
 	}
+	// Last 3 pixels (13, 14, 15) — packed with 0 as dummy 4th byte
+	uint32_t packed_last =
+	    ((uint32_t)orb_obj->image[idx + CIRCLE_OFFSETS[13]] << 24) |
+	    ((uint32_t)orb_obj->image[idx + CIRCLE_OFFSETS[14]] << 16) |
+	    ((uint32_t)orb_obj->image[idx + CIRCLE_OFFSETS[15]] <<  8) |
+	    0;  // dummy byte, result discarded
+
+	if (bright_or_dark)
+	    __USUB8(packed_last, origin_value_plus_threshold_packed);
+	else
+	    __USUB8(origin_value_minus_threshold_packed, packed_last);
+
+	uint32_t temp_result = __SEL(0x01010101, 0);
+	result |= ((uint16_t)((temp_result >> 24) & 0xFF) << 13) |
+	          ((uint16_t)((temp_result >> 16) & 0xFF) << 14) |
+	          ((uint16_t)((temp_result >>  8) & 0xFF) << 15);
 
 
-	if (consecutive_LUT[dark] || consecutive_LUT[bright]) {
-	    return (true);
-	}
+	uint32_t x = ((uint32_t)result << 16) | result;
+
+	for (int i = 0; i < 11; i++) {
+			x &= (x >> 1);
+		}
+
+	if (x!=0 ) return (true);
+
 	return (false);
 }
 
-
-
-/*
-bool FAST_assign_image(uint8_t *image_start){
-	// Takes the image
-	// Removes everything by 3
-	// Assign the struct the processed image
-	// return true if all good
-	if (image_start == NULL){
-		return false;
-	}
-	orb_obj.image = image_start;
-
-	return true;
-}
-
-
-*/
-
-/*
-inline bool FAST_detect(ORB_t *orb_obj){
-	if (orb_obj->image == NULL){
-		return false;
-	}
-	//uint8_t *image = g_fast_obj.image;
-	g_feature_count = 0;
-	// To calculate the compute of all 16 points
-
-	// Minus 3 for every corner so that no pixel is never not reached
-	for (int row=3; row <orb_obj->height-3; row++){
-		for (int col = 3; col < orb_obj->width - 3; col++) {
-
-			// Calculates the correct pixel to be used in get circle
-
-			orb_obj.pixel_index = (uint32_t)(row * IMAGE_WIDTH + col);
-
-#if PROFILING
-
-			DWT_start(DWT_Lookup("FAST: get circle"));
-
-#endif
-
-		FAST_circle_t curr_circle = FAST_get_circle();
-
-#if PROFILING
-			DWT_stop(DWT_Lookup("FAST: get circle"));
-#endif
-
-
-#if PROFILING
-			DWT_start(DWT_Lookup("FAST: compute and score"));
-#endif
-
-			// 16 comes from the number of pixels to compare with
-			//if (!FAST_compute_and_score(&curr_circle)) {continue;}
-			FAST_compute_and_score(&curr_circle);
-
-#if PROFILING
-			DWT_stop(DWT_Lookup("FAST: compute and score"));
-#endif
-		}
-	}
-
-	return true;
-}
-*/

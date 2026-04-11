@@ -1,4 +1,4 @@
-../Core/Src/ORB_implementation/Benchmarking.c:15:6:DWT_init	8	static
+../Core/Src/ORB_implementation/Benchmarking.c:15:6:DWT_init	4	static
 ../Core/Src/ORB_implementation/Benchmarking.c:34:8:DWT_register	16	static
 ../Core/Src/ORB_implementation/Benchmarking.c:43:6:DWT_start	0	static
 ../Core/Src/ORB_implementation/Benchmarking.c:49:6:DWT_stop	4	static

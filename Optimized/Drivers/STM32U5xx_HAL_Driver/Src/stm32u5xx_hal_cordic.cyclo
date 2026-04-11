@@ -3,8 +3,8 @@
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_cordic.c:340:13:HAL_CORDIC_MspDeInit	1
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_cordic.c:268:19:HAL_CORDIC_DeInit	2
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_cordic.c:558:19:HAL_CORDIC_Configure	2
-../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_cordic.c:605:19:HAL_CORDIC_Calculate	15
-../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_cordic.c:699:19:HAL_CORDIC_CalculateZO	13
+../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_cordic.c:605:19:HAL_CORDIC_Calculate	18
+../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_cordic.c:699:19:HAL_CORDIC_CalculateZO	16
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_cordic.c:792:19:HAL_CORDIC_Calculate_IT	7
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_cordic.c:884:19:HAL_CORDIC_Calculate_DMA	16
 ../Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_cordic.c:1056:13:HAL_CORDIC_ErrorCallback	1

@@ -297,7 +297,7 @@ int main(void)
 	  us_per_pixel = us_per_pixel/(SystemCoreClock / 1000000.0);
 	  double kitti_time_us = us_per_pixel*kitti_num_pixels;
 	  const char feature_msg[] = "None";
-	  const char performance_msg[] = "Added __restrict__ on the orb_obj->image and shifted to the current pixel index. Changed the fetching of values to match the pixel index change";
+	  const char performance_msg[] = "Unrolled the pixel threshold calculations.This revealed a bug with the previous implementation, it is now getting the correct amount of key points \nRemoved 1 branching instruction of the high speed test";
 	  output_commit_message(feature_msg,performance_msg );
 
 	  uint32_t used = stack_usage();

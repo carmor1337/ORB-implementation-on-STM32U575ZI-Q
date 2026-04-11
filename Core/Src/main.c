@@ -297,7 +297,7 @@ int main(void)
 	  us_per_pixel = us_per_pixel/(SystemCoreClock / 1000000.0);
 	  double kitti_time_us = us_per_pixel*kitti_num_pixels;
 	  const char feature_msg[] = "None";
-	  const char performance_msg[] = "Added compiler hints to the FAST loop";
+	  const char performance_msg[] = "Manually unrolled the loop for consecutive check";
 	  output_commit_message(feature_msg,performance_msg );
 
 	  uint32_t used = stack_usage();

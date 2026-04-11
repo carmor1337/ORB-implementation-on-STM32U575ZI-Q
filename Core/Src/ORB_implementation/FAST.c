@@ -303,11 +303,27 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 	 *
 	 */
 	uint32_t x = ((uint32_t)result << 16) | result;
-//#pragma GCC unroll 12
+/*
 	for (int i = 0; i < 11; i++) {
 			x &= (x >> 1);
 		}
 
+
+*/
+
+	// Loop unrolling
+	x &= (x >> 1);
+	x &= (x >> 1);
+	x &= (x >> 1);
+	x &= (x >> 1);
+	x &= (x >> 1);
+	x &= (x >> 1);
+	x &= (x >> 1);
+	x &= (x >> 1);
+	x &= (x >> 1);
+	x &= (x >> 1);
+	x &= (x >> 1);
+	x &= (x >> 1);
 	if (x!=0 ) return (true);
 
 	return (false);

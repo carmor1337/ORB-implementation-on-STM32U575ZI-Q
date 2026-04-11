@@ -179,8 +179,16 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 
 
 	uint8_t origin_value = orb_obj->image[idx];
-	uint8_t origin_value_plus_threshold  =  origin_value + ILLUMINATION_THRESHOLD;
-	uint8_t origin_value_minus_threshold =  origin_value - ILLUMINATION_THRESHOLD;
+	// Clamping to avid overflows
+	uint8_t origin_value_plus_threshold = (origin_value + ILLUMINATION_THRESHOLD > 255)
+	                                       ? 255
+	                                       : origin_value + ILLUMINATION_THRESHOLD;
+
+	uint8_t origin_value_minus_threshold = (origin_value < ILLUMINATION_THRESHOLD)
+	                                        ? 0
+	                                        : origin_value - ILLUMINATION_THRESHOLD;
+
+	// Adding calculated thresholds
 	uint32_t origin_value_plus_threshold_packed = ((uint32_t)origin_value_plus_threshold << 24) |
 												  ((uint32_t)origin_value_plus_threshold << 16) |
 												  ((uint32_t)origin_value_plus_threshold <<  8) |
@@ -323,7 +331,7 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 	x &= (x >> 1);
 	x &= (x >> 1);
 	x &= (x >> 1);
-	x &= (x >> 1);
+
 	if (x!=0 ) return (true);
 
 	return (false);

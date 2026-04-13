@@ -8,6 +8,6 @@
 #ifndef INC_OUTPUT_H_
 #define INC_OUTPUT_H_
 
-void output_commit_message(const char* commit_message,const char* performance_message);
+void output_commit_message(const char* feature_message,const char* performance_message);
 
 #endif /* INC_OUTPUT_H_ */

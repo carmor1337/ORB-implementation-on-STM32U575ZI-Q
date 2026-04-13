@@ -16,7 +16,7 @@
 #include "config.h"
 
 #include "Benchmarking.h"
-#include "Benchmarking_map.h"
+#include "profiling_config.h"
 
 // Link to site which has how to add the DSP lib
 // https://community.st.com/t5/stm32-mcus/how-to-integrate-cmsis-dsp-libraries-on-a-stm32-project/ta-p/666790
@@ -26,7 +26,13 @@
  * 		Check against threshold
  *
  *
- *
+ *Index lookup names
+"FAST: Setup"
+"FAST: HST"
+"FAST: Prepare calculations"
+"FAST: Do calculations"
+"FAST: Aggregate result"
+"FAST: Consecutive check"
  *
  *
  *
@@ -71,12 +77,16 @@ bool FAST_init(void){
 
 
 
-__attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
+__attribute__((hot)) inline bool FAST_detect(ORB_t *orb_obj){
 	// Compute 16 points and score
 	// Use the counters here
 	// decide to append point if not
 	// 16 comes from the number of pixels to compare with
 
+
+#if FAST_PROFILING
+	DWT_start(idx_FAST_setup);
+#endif
 	int32_t idx = (int32_t)orb_obj->pixel_index;
 	const uint8_t * __restrict__ img = orb_obj->image + idx;
 
@@ -85,27 +95,21 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 
 
 	uint8_t origin_value = img[0];
-	//uint8_t origin_value = orb_obj->image[idx];
+
 	// Clamping to avid overflows
-	uint8_t origin_value_plus_threshold = (origin_value + ILLUMINATION_THRESHOLD > 255)
-	                                       ? 255
-	                                       : origin_value + ILLUMINATION_THRESHOLD;
 
-	uint8_t origin_value_minus_threshold = (origin_value < ILLUMINATION_THRESHOLD)
-	                                        ? 0
-	                                        : origin_value - ILLUMINATION_THRESHOLD;
-
+	uint8_t origin_value_plus_threshold  = (uint8_t)__USAT((int32_t)origin_value + ILLUMINATION_THRESHOLD, 8);
+	uint8_t origin_value_minus_threshold = (uint8_t)__USAT((int32_t)origin_value - ILLUMINATION_THRESHOLD, 8);
 	// Adding calculated thresholds
-	uint32_t origin_value_plus_threshold_packed = ((uint32_t)origin_value_plus_threshold << 24) |
-												  ((uint32_t)origin_value_plus_threshold << 16) |
-												  ((uint32_t)origin_value_plus_threshold <<  8) |
-												  ((uint32_t)origin_value_plus_threshold <<  0);
+	// Instead of 4 shifts + 3 ORs:
+	uint32_t origin_value_plus_threshold_packed  = (uint32_t)origin_value_plus_threshold  * 0x01010101U;
+	uint32_t origin_value_minus_threshold_packed = (uint32_t)origin_value_minus_threshold * 0x01010101U;
 
-	uint32_t origin_value_minus_threshold_packed = ((uint32_t)origin_value_minus_threshold << 24) |
-												   ((uint32_t)origin_value_minus_threshold << 16) |
-												   ((uint32_t)origin_value_minus_threshold <<  8) |
-												   ((uint32_t)origin_value_minus_threshold <<  0);
 
+#if FAST_PROFILING
+	DWT_stop(idx_FAST_setup);
+	DWT_process_data(idx_FAST_setup);
+#endif
 	//
 	    /*
 	     ********************************************************
@@ -118,7 +122,7 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 	     */
 	// Check pixels 1,5,9,13 (paper notation) = indices 0,4,8,12 (0-based)
 #if FAST_PROFILING
-	DWT_start(DWT_Lookup("FAST: HST"));
+	DWT_start(idx_FAST_HSP);
 #endif
 	bool bright_or_dark = 0; // 1 for bright and 0 for dark
 	uint32_t high_speed_test_result = 0;
@@ -140,14 +144,20 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 	bool is_bright = __builtin_popcount(bright_result) >= 3;
 	bool is_dark   = __builtin_popcount(dark_result)   >= 3;
 
-	if (__builtin_expect(!is_bright && !is_dark, 1)) return (false);
+	if (__builtin_expect(!is_bright && !is_dark, 1)){
+#if FAST_PROFILING
+		DWT_stop(idx_FAST_HSP);
+#endif
+		return (false);
+	}
 
 	// Uses is bright to check which of the 2 computed possibilities are used
 	bright_or_dark         = is_bright;
 	high_speed_test_result = is_bright ? bright_result : dark_result;
 
 #if FAST_PROFILING
-	DWT_stop(DWT_Lookup("FAST: HST"));
+	DWT_stop(idx_FAST_HSP);
+	DWT_process_data(idx_FAST_HSP);
 #endif
 	//
     /*
@@ -163,6 +173,11 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 	uint16_t result_total = 0;
 
 	/***************************************************************************************/
+
+#if FAST_PROFILING
+	DWT_start(idx_FAST_prep_calc);
+#endif
+	//
 
 // Already have index 0,4,8,12
 // Packing all the bits for maths
@@ -181,8 +196,17 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 					  ((uint32_t)img[CIRCLE_OFFSETS[14]] <<  8) |
 					  ((uint32_t)img[CIRCLE_OFFSETS[15]] <<  0);
 
+#if FAST_PROFILING
+	DWT_stop(idx_FAST_prep_calc);
+	DWT_process_data(idx_FAST_prep_calc);
+#endif
+	//
 	/***************************************************************************************/
 
+#if FAST_PROFILING
+	DWT_start(idx_FAST_do_calc);
+#endif
+	//
 	uint32_t result_1 = 0;
 	uint32_t result_2 = 0;
 	uint32_t result_3 = 0;
@@ -210,8 +234,17 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 		result_3 = __SEL(0x01010101, 0);
 
 	}
+#if FAST_PROFILING
+	DWT_stop(idx_FAST_do_calc);
+	DWT_process_data(idx_FAST_do_calc);
+#endif
+	//
 
 	/***************************************************************************************/
+#if FAST_PROFILING
+	DWT_start(idx_FAST_get_result);
+#endif
+	//
 	// High speed test
 	result_total |= ((uint16_t)((high_speed_test_result >> 24) & 0xFF) << 0) |
 					((uint16_t)((high_speed_test_result >> 16) & 0xFF) << 4) |
@@ -235,10 +268,17 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 					 ((uint16_t)((result_3 >> 8)  & 0xFF) << 14) |
 					 ((uint16_t)((result_3 >> 0)  & 0xFF) << 15);
 
-
+#if FAST_PROFILING
+	DWT_stop(idx_FAST_get_result);
+	DWT_process_data(idx_FAST_get_result);
+#endif
+	//
 
 	/***************************************************************************************/
-
+#if FAST_PROFILING
+	DWT_start(idx_FAST_consecutive_check);
+#endif
+	//
 	/*
 	 ********************************************************
 	 *													    *
@@ -263,8 +303,18 @@ __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj){
 	x &= (x >> 1);
 	x &= (x >> 1);
 
-	if (x!=0 ) return (true);
-
+	if (x!=0 ){
+#if FAST_PROFILING
+	DWT_stop(idx_FAST_consecutive_check);
+	DWT_process_data(idx_FAST_consecutive_check);
+#endif
+		return (true);
+	}
+#if FAST_PROFILING
+	DWT_stop(idx_FAST_consecutive_check);
+	DWT_process_data(idx_FAST_consecutive_check);
+#endif
 	return (false);
+	//
 }
 

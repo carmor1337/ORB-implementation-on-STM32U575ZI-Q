@@ -39,7 +39,7 @@
 #include "config.h"
 #include "common_includes.h"
 #include "output.h"
-
+#include "profiling_config.h"
 
 /* USER CODE END Includes */
 
@@ -125,54 +125,8 @@ int main(void)
 	//DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 
 
-	DWT_init();
-	DWT_MapInit();
-	int8_t idx_ORB_total =   DWT_register("ORB");
-#if ORB_PROFILING
-	int8_t idx_FAST_total=   DWT_register("FAST");
-	int8_t idx_HARRIS_total = DWT_register("Harris");
-	int8_t idx_Centroid_total = DWT_register("Centroid");
-	int8_t idx_rBRIEF_total = DWT_register("rBRIEF");
+	profiling_init();
 
-	DEBUG_VAR(idx_FAST_total);
-    DEBUG_VAR(idx_HARRIS_total);
-    DEBUG_VAR(idx_Centroid_total);
-    DEBUG_VAR(idx_rBRIEF_total);
-#endif
-	// Fast profiles
-#if FAST_PROFILING
-	int8_t idx_FAST_HSP=   DWT_register("FAST: HST");
-	DEBUG_VAR(idx_FAST_HSP);
-	int8_t idx_FAST_get_circle=   DWT_register("FAST: Circle");
-	DEBUG_VAR(idx_FAST_get_circle);
-#endif
-
-	// Harris profiles
-
-#if HARRIS_PROFILING
-	int8_t idx_HARRIS_compute_matrix = DWT_register("HARRIS:matrix");
-	DEBUG_VAR(idx_HARRIS_compute_matrix);
-#endif
-
-	// Centroid Profiles
-
-#if CENTROID_PROFILING
-	int8_t idx_Centroid_momentumsl = DWT_register("Centroid:m01,m10");
-	int8_t idx_Centroid_atan2 = DWT_register("Centroid:atan2");
-
-	DEBUG_VAR(idx_Centroid_momentumsl);
-	DEBUG_VAR(idx_Centroid_atan2);
-#endif
-
-	// rBRIEF profiles
-
-#if rBRIEF_PROFILING
-	int8_t idx_rBRIEF_rotation = DWT_register("rBRIEF:rotation");
-	int8_t idx_rBRIEF_sample = DWT_register("rBRIEF:sample");
-
-	DEBUG_VAR(idx_rBRIEF_rotation);
-	DEBUG_VAR(idx_rBRIEF_sample);
-#endif
 
 
 	// Trying to get the image into ram
@@ -275,7 +229,7 @@ int main(void)
 	  ORB_extract_and_match();
 
 	  DWT_stop(idx_ORB_total);
-
+	  DWT_process_data(idx_ORB_total);
 	  DWT_convert_all_profiles_to_timed();
 	  DWT_Profile_t *ORB_profile = DWT_get(idx_ORB_total);
 	  DWT_timed_pair_t *Orb_profile_timed =DWT_get_timed(idx_ORB_total);
@@ -297,7 +251,7 @@ int main(void)
 	  us_per_pixel = us_per_pixel/(SystemCoreClock / 1000000.0);
 	  double kitti_time_us = us_per_pixel*kitti_num_pixels;
 	  const char feature_msg[] = "None";
-	  const char performance_msg[] = "Unrolled the pixel threshold calculations.This revealed a bug with the previous implementation, it is now getting the correct amount of key points \nRemoved 1 branching instruction of the high speed test";
+	  const char performance_msg[] = "Fixed the benchmarking doing 3 ms per call, thus adding lots of overhead\nImplemented Loop unrolling and SIMD instructions in FAST";
 	  output_commit_message(feature_msg,performance_msg );
 
 	  uint32_t used = stack_usage();

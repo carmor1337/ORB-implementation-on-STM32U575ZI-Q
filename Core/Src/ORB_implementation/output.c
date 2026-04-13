@@ -14,6 +14,7 @@
 #include "output.h"
 #include "Benchmarking.h"
 #include "Benchmarking_map.h"
+#include "profiling_config.h"
 #include "common_includes.h"
 #include "config.h"
 #include "main.h"
@@ -26,8 +27,8 @@ static double g_convert_to_percent = 100.0;
 
 
 static double output_commit_overview(const char* feature_message,const char* performance_message){
-	const char *sections[] = {"FAST", "Harris", "Centroid","rBRIEF"};
-	int num_of_sections = 4;
+
+
 	uint16_t feature_count = ORB_get_feature_count();
 
 
@@ -44,9 +45,11 @@ static double output_commit_overview(const char* feature_message,const char* per
 	printf("- %-*s %*.0fms\n",
 			COL_OVERVIEW_SECTION_NAME, "Total:",
 			COL_OVERVIEW_NUM, (double)g_total_ms);
-	#if ORB_PROFILING
 
+#if ORB_PROFILING
 
+	int num_of_sections = 4;
+	const char *sections[] = {"FAST", "Harris", "Centroid","rBRIEF"};
 	for (int i= 0; i < num_of_sections; i++){
 		DWT_timed_pair_t* times_profile = DWT_get_timed(DWT_Lookup(sections[i]));
 		char label[COL_OVERVIEW_SECTION_NAME + 2];
@@ -66,7 +69,7 @@ static double output_commit_overview(const char* feature_message,const char* per
 				COL_OVERVIEW_NUM,          (double)(g_total_ms- other_total_ms),
 				COL_OVERVIEV_PERCENTAGE,   (double)((g_total_ms- other_total_ms) / g_total_ms * g_convert_to_percent));
 
-	#endif
+#endif
 	printf("\n");
 	printf("=== Configs ====\n");
 	printf("FAST:     threshold (t) %d, n = %d\n",ILLUMINATION_THRESHOLD,CONTINUOUS_PIXEL_THRESHOLD);
@@ -93,7 +96,7 @@ static void setup_table_header(const char* header){
 
 	// Separator
 	printf("|%-*s-|-%-*s-|-%-*s-|-%-*s-|-%-*s-|-%-*s\n",
-		COL_PART, "------------------",
+		COL_PART, "----------------------------",
 		COL_NUM,  "----------",
 		COL_NUM,  "----------",
 		COL_NUM,  "----------",
@@ -178,15 +181,15 @@ static void output_commit_table(void){
 
 
 
-void output_commit_message(const char* commit_message,const char* performance_message){
+void output_commit_message(const char* feature_message,const char* performance_message){
 	DWT_convert_all_profiles_to_timed();
-	DWT_timed_pair_t* orb_times_profile= DWT_get_timed(DWT_Lookup("ORB"));
+	DWT_timed_pair_t* orb_times_profile= DWT_get_timed(idx_ORB_total);
 
 	g_total_us = orb_times_profile->profiles_us.aggregate;
 	g_total_ms = orb_times_profile->profiles_ms.aggregate;
 
 
-	output_commit_overview(commit_message,performance_message);
+	output_commit_overview(feature_message,performance_message);
 	output_commit_table();
 	printf("=====================================================================\n\n");
 

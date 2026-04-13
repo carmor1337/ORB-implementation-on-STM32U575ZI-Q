@@ -5,7 +5,7 @@
 #include "Benchmarking.h"
 #include "Benchmarking_map.h"
 
-static DWT_Registry_t dwt_registry;
+DWT_Registry_t dwt_registry;
 
 static DWT_timed_pair_t dwt_timed_registry[DWT_MAX_PROFILES];
 
@@ -40,22 +40,16 @@ int8_t DWT_register(const char *label) {
     return ((int8_t)idx);
 }
 
-void DWT_start(int8_t idx) {
 
-    dwt_registry.profiles[idx].start = DWT->CYCCNT;
+void DWT_process_data(int8_t idx){
+	DWT_Profile_t *p = &dwt_registry.profiles[idx];
 
+	if (p->elapsed < p->min) p->min = p->elapsed;
+	if (p->elapsed > p->max) p->max = p->elapsed;
+	p->avg = (uint32_t)(((uint64_t)p->avg * p->runs + p->elapsed) / (p->runs + 1));
+	p->runs++;
+	p->aggregate += p->elapsed;
 }
-
-void DWT_stop(int8_t idx) {
-    DWT_Profile_t *p = &dwt_registry.profiles[idx];
-    p->elapsed = DWT->CYCCNT - p->start;
-    if (p->elapsed < p->min) p->min = p->elapsed;
-    if (p->elapsed > p->max) p->max = p->elapsed;
-    p->avg = (p->avg * p->runs + p->elapsed) / (p->runs + 1);
-    p->runs++;
-    p->aggregate += p->elapsed;
-}
-
 // Get a pointer to a profile by index
 DWT_Profile_t *DWT_get(int8_t idx) {
     return (&dwt_registry.profiles[idx]);

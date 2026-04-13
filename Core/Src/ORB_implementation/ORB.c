@@ -12,7 +12,7 @@
 #include <stdio.h>
 
 #include "Benchmarking.h"
-#include "Benchmarking_map.h"
+#include "profiling_config.h"
 #include "common_includes.h"
 #include "config.h"
 #include "main.h"
@@ -105,23 +105,28 @@ void ORB_extract_and_match(void){
 				// First FAST
 				// 	Should FAST be run once or chained together?
 #if ORB_PROFILING
-				DWT_start(DWT_Lookup("FAST"));
+				DWT_start(idx_FAST_total);
 #endif
+
 				bool is_feature_point = FAST_detect(&g_orb_obj);
+
 #if ORB_PROFILING
-				  DWT_stop(DWT_Lookup("FAST"));
+				  DWT_stop(idx_FAST_total);
+				  DWT_process_data(idx_FAST_total);
 #endif
+
 				if (!is_feature_point){ continue;}
 				uint16_t x = (uint16_t)g_orb_obj.pixel_index % IMAGE_WIDTH;
 				uint16_t y = (uint16_t)g_orb_obj.pixel_index / IMAGE_WIDTH;
 #if ORB_PROFILING
-				DWT_start(DWT_Lookup("Harris"));
+				DWT_start(idx_HARRIS_total);
 #endif
 				// Then Harris score
 				float score = harris_score_compute(&g_orb_obj);
 
 #if ORB_PROFILING
-				  DWT_stop(DWT_Lookup("Harris"));
+				  DWT_stop(idx_HARRIS_total);
+				  DWT_process_data(idx_HARRIS_total);
 #endif
 
 				  if (!append_feature_point(x, y, score)) { continue; }
@@ -130,23 +135,34 @@ void ORB_extract_and_match(void){
 
 				get_ORB_patch(&g_orb_obj, &patch);
 #if ORB_PROFILING
-				DWT_start(DWT_Lookup("Centroid"));
+				DWT_start(idx_Centroid_total);
 #endif
 
 				compute_intensity_centroid(&g_orb_obj, fp, g_orb_obj.pixel_index );
 
 #if ORB_PROFILING
-			    DWT_stop(DWT_Lookup("Centroid"));
+			    DWT_stop(idx_Centroid_total);
+			    DWT_process_data(idx_Centroid_total);
 
-				DWT_start(DWT_Lookup("rBRIEF"));
+				DWT_start(idx_rBRIEF_total);
 #endif
 
 				rBRIEF_compute(fp, &patch);
 
 #if ORB_PROFILING
-				DWT_stop(DWT_Lookup("rBRIEF"));
+				DWT_stop(idx_rBRIEF_total);
+				 DWT_process_data(idx_rBRIEF_total);
 #endif
-
+/*
+#if FAST_PROFILING
+				  DWT_process_data(idx_FAST_setup);
+				  DWT_process_data(idx_FAST_HSP);
+				  DWT_process_data(idx_FAST_prep_calc);
+				  DWT_process_data(idx_FAST_do_calc);
+				  DWT_process_data(idx_FAST_get_result);
+				  DWT_process_data(idx_FAST_consecutive_check);
+#endif
+*/
 			}
 	}
 

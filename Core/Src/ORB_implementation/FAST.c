@@ -39,6 +39,9 @@
  *
  */
 
+
+#define BYTES_TO_NIBBLE(val) (((val) * 0x10204080U) >> 28)
+
 #ifndef __ARM_FEATURE_DSP
   #error "DSP extension not enabled! Add -march=armv8-m.main+dsp to compiler flags"
 #endif
@@ -64,7 +67,21 @@ static const uint8_t wrap[28] = {
     0,1,2,3,4,5,6,7,8,9,10,11
 };
 */
-
+static inline uint32_t usub8_sel(uint32_t a, uint32_t b, uint32_t t, uint32_t f)
+{
+    uint32_t result;
+    __asm volatile (
+        "usub8  %[a], %[a], %[b]   \n\t"   // sets GE flags, result discarded
+        "sel    %[r],  %[t], %[f]  \n\t"   // reads GE flags immediately
+        : [r]  "=r" (result),
+          [a]  "+r"  (a)                    // a is modified (but we don't care)
+        : [b]  "r"  (b),
+          [t]  "r"  (t),
+          [f]  "r"  (f)
+        : /* GE flags are implicit, no need to list */
+    );
+    return (result);
+}
 
 
 
@@ -125,7 +142,7 @@ __attribute__((hot)) inline bool FAST_detect(ORB_t *orb_obj){
 	DWT_start(idx_FAST_HSP);
 #endif
 	bool bright_or_dark = 0; // 1 for bright and 0 for dark
-	uint32_t high_speed_test_result = 0;
+	//uint32_t high_speed_test_result = 0;
 	uint32_t high_speed_test_packed =((uint32_t)img[CIRCLE_OFFSETS[0]]  << 24) |
 									 ((uint32_t)img[CIRCLE_OFFSETS[4]]  << 16) |
 									 ((uint32_t)img[CIRCLE_OFFSETS[8]]  <<  8) |
@@ -135,14 +152,11 @@ __attribute__((hot)) inline bool FAST_detect(ORB_t *orb_obj){
 	// Checking if greater than
 	// __USUBB8 Sets the bits in a register that __SEL then reads from and gets the greater than values
 	// __USUB8 is used because it can never underflow, while __UADD8 can overflow
-	__USUB8(high_speed_test_packed, origin_value_plus_threshold_packed);
-	uint32_t bright_result = __SEL(0x01010101, 0);
+	uint32_t bright_result = usub8_sel(high_speed_test_packed, origin_value_plus_threshold_packed,  0x01010101U, 0U);
+	uint32_t dark_result   = usub8_sel(origin_value_minus_threshold_packed, high_speed_test_packed, 0x01010101U, 0U);
 
-	__USUB8(origin_value_minus_threshold_packed, high_speed_test_packed);
-	uint32_t dark_result = __SEL(0x01010101, 0);
-
-	bool is_bright = __builtin_popcount(bright_result) >= 3;
-	bool is_dark   = __builtin_popcount(dark_result)   >= 3;
+	bool is_bright = __USAD8(bright_result, 0U) >= 3;
+	bool is_dark   = __USAD8(dark_result,   0U) >= 3;
 
 	if (__builtin_expect(!is_bright && !is_dark, 1)){
 #if FAST_PROFILING
@@ -153,7 +167,7 @@ __attribute__((hot)) inline bool FAST_detect(ORB_t *orb_obj){
 
 	// Uses is bright to check which of the 2 computed possibilities are used
 	bright_or_dark         = is_bright;
-	high_speed_test_result = is_bright ? bright_result : dark_result;
+	//high_speed_test_result = is_bright ? bright_result : dark_result;
 
 #if FAST_PROFILING
 	DWT_stop(idx_FAST_HSP);
@@ -170,7 +184,6 @@ __attribute__((hot)) inline bool FAST_detect(ORB_t *orb_obj){
      *
      */
 	// Start from index 1 (pixel 2) since high speed test gets the 1,5,9,13 pixels
-	uint16_t result_total = 0;
 
 	/***************************************************************************************/
 
@@ -181,20 +194,25 @@ __attribute__((hot)) inline bool FAST_detect(ORB_t *orb_obj){
 
 // Already have index 0,4,8,12
 // Packing all the bits for maths
-	uint32_t packed1 = ((uint32_t)img[CIRCLE_OFFSETS[1]] << 24) |
-					   ((uint32_t)img[CIRCLE_OFFSETS[2]] << 16) |
-					   ((uint32_t)img[CIRCLE_OFFSETS[3]] <<  8) |
-					   ((uint32_t)img[CIRCLE_OFFSETS[5]] <<  0);
+	uint32_t packed1 = ((uint32_t)img[CIRCLE_OFFSETS[0]] << 24) |
+					   ((uint32_t)img[CIRCLE_OFFSETS[1]] << 16) |
+					   ((uint32_t)img[CIRCLE_OFFSETS[2]] <<  8) |
+					   ((uint32_t)img[CIRCLE_OFFSETS[3]] <<  0);
 
-	uint32_t packed2 = ((uint32_t)img[CIRCLE_OFFSETS[6]] << 24) |
-					   ((uint32_t)img[CIRCLE_OFFSETS[7]] << 16) |
-					   ((uint32_t)img[CIRCLE_OFFSETS[9]] <<  8) |
-					   ((uint32_t)img[CIRCLE_OFFSETS[10]]<<  0);
+	uint32_t packed2 = ((uint32_t)img[CIRCLE_OFFSETS[4]] << 24) |
+					   ((uint32_t)img[CIRCLE_OFFSETS[5]] << 16) |
+					   ((uint32_t)img[CIRCLE_OFFSETS[6]] <<  8) |
+					   ((uint32_t)img[CIRCLE_OFFSETS[7]]<<  0);
 
-	uint32_t packed3 =((uint32_t)img[CIRCLE_OFFSETS[11]] << 24) |
-					  ((uint32_t)img[CIRCLE_OFFSETS[13]] << 16) |
-					  ((uint32_t)img[CIRCLE_OFFSETS[14]] <<  8) |
-					  ((uint32_t)img[CIRCLE_OFFSETS[15]] <<  0);
+	uint32_t packed3 =((uint32_t)img[CIRCLE_OFFSETS[8]] << 24) |
+					  ((uint32_t)img[CIRCLE_OFFSETS[9]] << 16) |
+					  ((uint32_t)img[CIRCLE_OFFSETS[10]] <<  8) |
+					  ((uint32_t)img[CIRCLE_OFFSETS[11]] <<  0);
+
+	uint32_t packed4 =((uint32_t)img[CIRCLE_OFFSETS[12]] << 24) |
+						  ((uint32_t)img[CIRCLE_OFFSETS[13]] << 16) |
+						  ((uint32_t)img[CIRCLE_OFFSETS[14]] <<  8) |
+						  ((uint32_t)img[CIRCLE_OFFSETS[15]] <<  0);
 
 #if FAST_PROFILING
 	DWT_stop(idx_FAST_prep_calc);
@@ -210,28 +228,21 @@ __attribute__((hot)) inline bool FAST_detect(ORB_t *orb_obj){
 	uint32_t result_1 = 0;
 	uint32_t result_2 = 0;
 	uint32_t result_3 = 0;
+	uint32_t result_4 = 0;
 
 	if (bright_or_dark){
-		__USUB8(packed1, origin_value_plus_threshold_packed);
-		result_1 = __SEL(0x01010101, 0);
-
-		__USUB8(packed2, origin_value_plus_threshold_packed);
-		result_2 = __SEL(0x01010101, 0);
-
-		__USUB8(packed3, origin_value_plus_threshold_packed);
-		result_3 = __SEL(0x01010101, 0);
-
+		// bright path
+		result_1 = usub8_sel(packed1, origin_value_plus_threshold_packed, 0x01010101U, 0U);
+		result_2 = usub8_sel(packed2, origin_value_plus_threshold_packed, 0x01010101U, 0U);
+		result_3 = usub8_sel(packed3, origin_value_plus_threshold_packed, 0x01010101U, 0U);
+		result_4 = usub8_sel(packed4, origin_value_plus_threshold_packed, 0x01010101U, 0U);
 
 	}
 	else{
-		__USUB8(origin_value_minus_threshold_packed, packed1);
-		result_1 = __SEL(0x01010101, 0);
-
-		__USUB8(origin_value_minus_threshold_packed, packed2);
-		result_2 = __SEL(0x01010101, 0);
-
-		__USUB8(origin_value_minus_threshold_packed, packed3);
-		result_3 = __SEL(0x01010101, 0);
+		result_1 = usub8_sel(origin_value_minus_threshold_packed, packed1, 0x01010101U, 0U);
+		result_2 = usub8_sel(origin_value_minus_threshold_packed, packed2, 0x01010101U, 0U);
+		result_3 = usub8_sel(origin_value_minus_threshold_packed, packed4, 0x01010101U, 0U);
+		result_4 = usub8_sel(origin_value_minus_threshold_packed, packed4, 0x01010101U, 0U);
 
 	}
 #if FAST_PROFILING
@@ -245,6 +256,13 @@ __attribute__((hot)) inline bool FAST_detect(ORB_t *orb_obj){
 	DWT_start(idx_FAST_get_result);
 #endif
 	//
+	uint16_t result_total = (uint16_t)(
+	    BYTES_TO_NIBBLE(result_1)        |
+	   (BYTES_TO_NIBBLE(result_2) <<  4) |
+	   (BYTES_TO_NIBBLE(result_3) <<  8) |
+	   (BYTES_TO_NIBBLE(result_4) << 12)
+	);
+	/*
 	// High speed test
 	result_total |= ((uint16_t)((high_speed_test_result >> 24) & 0xFF) << 0) |
 					((uint16_t)((high_speed_test_result >> 16) & 0xFF) << 4) |
@@ -267,7 +285,7 @@ __attribute__((hot)) inline bool FAST_detect(ORB_t *orb_obj){
 					 ((uint16_t)((result_3 >> 16) & 0xFF) << 13) |
 					 ((uint16_t)((result_3 >> 8)  & 0xFF) << 14) |
 					 ((uint16_t)((result_3 >> 0)  & 0xFF) << 15);
-
+*/
 #if FAST_PROFILING
 	DWT_stop(idx_FAST_get_result);
 	DWT_process_data(idx_FAST_get_result);

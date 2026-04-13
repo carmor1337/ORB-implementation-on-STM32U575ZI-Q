@@ -25,6 +25,7 @@ static double g_total_us = 0;
 static double g_total_ms = 0;
 static double g_convert_to_percent = 100.0;
 
+//static const int32_t kitti_num_pixels = 1241 * 376;
 
 static double output_commit_overview(const char* feature_message,const char* performance_message){
 
@@ -49,11 +50,11 @@ static double output_commit_overview(const char* feature_message,const char* per
 #if ORB_PROFILING
 
 	int num_of_sections = 4;
-	const char *sections[] = {"FAST", "Harris", "Centroid","rBRIEF"};
+	int8_t sections[] = {idx_FAST_total,idx_HARRIS_total,idx_Centroid_total,idx_rBRIEF_total };
 	for (int i= 0; i < num_of_sections; i++){
-		DWT_timed_pair_t* times_profile = DWT_get_timed(DWT_Lookup(sections[i]));
+		DWT_timed_pair_t* times_profile = DWT_get_timed(sections[i]);
 		char label[COL_OVERVIEW_SECTION_NAME + 2];
-		snprintf(label, sizeof(label), "%s:", sections[i]);
+		snprintf(label, sizeof(label), "%s:", times_profile->profiles_ms.label);
 
 		printf("- %-*s %*.0fms (%*.1f%%)\n",
 			COL_OVERVIEW_SECTION_NAME, label,          // left align string to fixed width
@@ -95,8 +96,9 @@ static void setup_table_header(const char* header){
 		COL_NUM,  "% total");
 
 	// Separator
-	printf("|%-*s-|-%-*s-|-%-*s-|-%-*s-|-%-*s-|-%-*s\n",
+	printf("|%-*s-|-%-*s-|-%-*s-|-%-*s-|-%-*s-|-%-*s-|-%-*s\n",
 		COL_PART, "----------------------------",
+		COL_NUM,  "----------",
 		COL_NUM,  "----------",
 		COL_NUM,  "----------",
 		COL_NUM,  "----------",

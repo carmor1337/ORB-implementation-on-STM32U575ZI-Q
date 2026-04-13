@@ -68,7 +68,7 @@
 
 
 // FAST Config
-#define ILLUMINATION_THRESHOLD     60 // Is in uint8_t
+#define ILLUMINATION_THRESHOLD     70 // Is in uint8_t
 #define CONTINUOUS_PIXEL_THRESHOLD 12 // Also called fast 12
 
 // Harris Config

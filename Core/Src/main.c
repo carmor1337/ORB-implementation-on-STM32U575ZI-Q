@@ -135,7 +135,7 @@ int main(void)
 
 	static const int num_pixels = IMAGE_HEIGTH * IMAGE_WIDTH;
 	// Kitty dataset has 1241 x 376
-	static const int32_t kitti_num_pixels = 2341 * 376;
+	static const int32_t kitti_num_pixels = 1241 * 376;
 
 
 
@@ -251,7 +251,7 @@ int main(void)
 	  us_per_pixel = us_per_pixel/(SystemCoreClock / 1000000.0);
 	  double kitti_time_us = us_per_pixel*kitti_num_pixels;
 	  const char feature_msg[] = "None";
-	  const char performance_msg[] = "Fixed the benchmarking doing 3 ms per call, thus adding lots of overhead\nImplemented Loop unrolling and SIMD instructions in FAST";
+	  const char performance_msg[] = "Switched out __builtint_popcount to __USAD8, Restructured the result accumulation and full threshold testing";
 	  output_commit_message(feature_msg,performance_msg );
 
 	  uint32_t used = stack_usage();

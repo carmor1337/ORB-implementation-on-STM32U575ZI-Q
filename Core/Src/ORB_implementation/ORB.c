@@ -24,9 +24,12 @@
 #include "rBrief.h"
 
 
-
+__attribute__((section(".sram1"), aligned(32)))
 static ORB_t g_orb_obj;
+
+__attribute__((section(".sram1"), aligned(32)))
 static ORB_feature_point_t g_feature_points[MAX_FEATURE_POINTS];
+
 static uint16_t g_feature_count = 0;
 
 

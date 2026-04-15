@@ -8,7 +8,7 @@
 #ifndef INC_BENCHMARKING_H
 #define INC_BENCHMARKING_H
 
-
+#include "main.h"
 #include <stdint.h>
 #define DWT_MAX_PROFILES 10
 
@@ -44,15 +44,24 @@ typedef struct {
 }DWT_timed_pair_t;
 
 
+extern DWT_Registry_t dwt_registry;
+
 void DWT_init(void);
 
 int8_t DWT_register(const char *label);
 
 
-void DWT_start(int8_t idx);
 
-void DWT_stop(int8_t idx);
 
+__attribute__((always_inline)) inline void DWT_start(int8_t idx) {
+
+    dwt_registry.profiles[idx].start = DWT->CYCCNT;
+
+}
+__attribute__((always_inline)) inline  void DWT_stop(int8_t idx) {
+    DWT_Profile_t *p = &dwt_registry.profiles[idx];
+    p->elapsed = DWT->CYCCNT - p->start;;
+}
 DWT_Profile_t *DWT_get(int8_t idx);
 
 DWT_timed_pair_t *DWT_get_timed(int8_t idx);
@@ -74,5 +83,7 @@ uint16_t DWT_get_profile_count(void);
 DWT_Registry_t* DWT_get_registry(void);
 
 DWT_timed_pair_t* DWT_get_timed_registry(void);
+
+void DWT_process_data(int8_t idx);
 
 #endif /* INC_BENCHMARKING_H_ */

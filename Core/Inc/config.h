@@ -1,10 +1,11 @@
+
 /*
  * config.h
  *
  *  Created on: 6 apr. 2026
  *      Author: erika
  */
-
+#include "Benchmarking.h"
 #ifndef INC_CONFIG_H
 #define INC_CONFIG_H
 
@@ -12,6 +13,15 @@
 // width x heigth
 #define IMAGE_WIDTH  		   320 // Pixels
 #define IMAGE_HEIGTH		   240 // Pixels
+
+/*
+    ********************************************************
+    *													    *
+    *				  Benchmark	config  				    *
+    *													    *
+    ********************************************************
+*/
+
 
 // Benchmarking configs
 #define ORB_PROFILING 	   1
@@ -21,6 +31,13 @@
 #define CENTROID_PROFILING 0
 #define rBRIEF_PROFILING   0
 
+/*
+    ********************************************************
+    *													    *
+    *				   Output config					    *
+    *													    *
+    ********************************************************
+*/
 // Define in your code
 #if defined(__OPTIMIZE_SIZE__)
     #define OPT_LEVEL "Os"
@@ -31,12 +48,20 @@
 #endif
 
 // For the printing in SWV
-#define COL_PART  17
-#define COL_NUM   10
+#define COL_PART  27
+#define COL_NUM   11
 
 #define COL_OVERVIEW_SECTION_NAME  12
 #define COL_OVERVIEW_NUM 6
 #define COL_OVERVIEV_PERCENTAGE 5
+
+/*
+	********************************************************
+	*													    *
+	*				  Algorithm CONFIG					    *
+	*													    *
+	********************************************************
+*/
 
 // ORB Config
 #define MAX_FEATURE_POINTS 700
@@ -44,7 +69,7 @@
 
 
 // FAST Config
-#define ILLUMINATION_THRESHOLD     40 // Is in uint8_t
+#define ILLUMINATION_THRESHOLD     70 // Is in uint8_t
 #define CONTINUOUS_PIXEL_THRESHOLD 12 // Also called fast 12
 
 // Harris Config
@@ -58,7 +83,13 @@
 
 // Feature matching Config
 
-
+/*
+	********************************************************
+	*													    *
+	*				   MISC					    			*
+	*													    *
+	********************************************************
+*/
 
 // Misc
 #define LED_BLINK_WAIT 500

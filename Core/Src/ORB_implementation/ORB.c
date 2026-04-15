@@ -15,6 +15,7 @@
 #include "Benchmarking_map.h"
 #include "common_includes.h"
 #include "config.h"
+#include "profiling_config.h"
 #include "main.h"
 
 #include "ORB.h"
@@ -99,54 +100,87 @@ void ORB_extract_and_match(void){
 	g_feature_count = 0;
 	uint16_t current_index = g_feature_count;
 	for (int row=3; row <g_orb_obj.height-3; row++){
-			for (int col = 3; col < g_orb_obj.width - 3; col++) {
-				g_orb_obj.pixel_index = (uint32_t)(row * IMAGE_WIDTH + col);
+		for (int col = 3; col < g_orb_obj.width - 3; col++) {
+			g_orb_obj.pixel_index = (uint32_t)(row * IMAGE_WIDTH + col);
+/*************************  FAST Start *******************************************/
 
-				// First FAST
-				// 	Should FAST be run once or chained together?
 #if ORB_PROFILING
-				DWT_start(DWT_Lookup("FAST"));
+			DWT_start(idx_FAST_total);
 #endif
-				bool is_feature_point = FAST_detect(&g_orb_obj);
+
+			bool is_feature_point = FAST_detect(&g_orb_obj);
+
 #if ORB_PROFILING
-				  DWT_stop(DWT_Lookup("FAST"));
+			DWT_stop(idx_FAST_total);
+			DWT_process_data(idx_FAST_total);
+
+/*************************  FAST Stop *******************************************/
+
+/*************************  Check feature point Start *******************************************/
+
+			DWT_start(idx_is_feature_point_and_coords);
 #endif
-				if (!is_feature_point){ continue;}
-				uint16_t x = (uint16_t)g_orb_obj.pixel_index % IMAGE_WIDTH;
-				uint16_t y = (uint16_t)g_orb_obj.pixel_index / IMAGE_WIDTH;
+
+			if (!is_feature_point){ continue;}
+			uint16_t x = (uint16_t)g_orb_obj.pixel_index % IMAGE_WIDTH;
+			uint16_t y = (uint16_t)g_orb_obj.pixel_index / IMAGE_WIDTH;
+
 #if ORB_PROFILING
-				DWT_start(DWT_Lookup("Harris"));
+			DWT_stop(idx_is_feature_point_and_coords);
+			DWT_process_data(idx_is_feature_point_and_coords);
+
+/*************************  Check feature point Stop *******************************************/
+
+/************************* Harris Start  *******************************************/
+			DWT_start(idx_HARRIS_total);
 #endif
+
 				// Then Harris score
-				float score = harris_score_compute(&g_orb_obj);
+			float score = harris_score_compute(&g_orb_obj);
 
 #if ORB_PROFILING
-				  DWT_stop(DWT_Lookup("Harris"));
+			DWT_stop(idx_HARRIS_total);
+			DWT_process_data(idx_HARRIS_total);
+/*************************  Harris Stop *******************************************/
+
+/*************************  Get ORB patch Start *******************************************/
+			DWT_start(idx_get_ORB_patch);
 #endif
+			if (!append_feature_point(x, y, score)) { continue; }
+			ORB_keypoint_patch_t patch;
+			ORB_feature_point_t *fp = &g_orb_obj.feature_point_list[current_index];
 
-				  if (!append_feature_point(x, y, score)) { continue; }
-				ORB_keypoint_patch_t patch;
-				ORB_feature_point_t *fp = &g_orb_obj.feature_point_list[current_index];
-
-				get_ORB_patch(&g_orb_obj, &patch);
-#if ORB_PROFILING
-				DWT_start(DWT_Lookup("Centroid"));
-#endif
-
-				compute_intensity_centroid(&g_orb_obj, fp, g_orb_obj.pixel_index );
-
-#if ORB_PROFILING
-			    DWT_stop(DWT_Lookup("Centroid"));
-
-				DWT_start(DWT_Lookup("rBRIEF"));
-#endif
-
-				rBRIEF_compute(fp, &patch);
+			get_ORB_patch(&g_orb_obj, &patch);
 
 #if ORB_PROFILING
-				DWT_stop(DWT_Lookup("rBRIEF"));
+			DWT_stop(idx_get_ORB_patch);
+			DWT_process_data(idx_get_ORB_patch);
+/*************************  Get ORB patch Stop *******************************************/
+
+/*************************  Centroid Start *******************************************/
+			DWT_start(idx_Centroid_total);
 #endif
 
+			compute_intensity_centroid(&g_orb_obj, fp, g_orb_obj.pixel_index );
+
+#if ORB_PROFILING
+			DWT_stop(idx_Centroid_total);
+			DWT_process_data(idx_Centroid_total);
+
+/*************************  Centroid Stop *******************************************/
+
+/*************************  rBRIEF Start *******************************************/
+
+			DWT_start(idx_rBRIEF_total);
+#endif
+
+			rBRIEF_compute(fp, &patch);
+
+#if ORB_PROFILING
+			DWT_stop(idx_rBRIEF_total);
+			DWT_process_data(idx_rBRIEF_total);
+#endif
+/*************************  rBRIEF Stop *******************************************/
 			}
 	}
 

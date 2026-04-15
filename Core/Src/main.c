@@ -39,6 +39,7 @@
 #include "config.h"
 #include "common_includes.h"
 #include "output.h"
+#include "profiling_config.h"
 
 /* USER CODE END Includes */
 
@@ -77,7 +78,7 @@ static void SystemPower_Config(void);
 /* USER CODE BEGIN 0 */
 
 // Makes it so printf gets to the debugger terminal
-	int _write(int fd, char *ptr, int len) {
+__attribute__((used))	int _write(int fd, char *ptr, int len) {
 		(void)fd;
 	    for (int i = 0; i < len; i++) {
 	        while (ITM->PORT[0].u32 == 0);  // wait until ready
@@ -124,52 +125,8 @@ int main(void)
 	//DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 
 
-	DWT_init();
-	DWT_MapInit();
-	int8_t idx_ORB_total =   DWT_register("ORB");
-#if ORB_PROFILING
-	int8_t idx_FAST_total=   DWT_register("FAST");
-	int8_t idx_HARRIS_total = DWT_register("Harris");
-	int8_t idx_Centroid_total = DWT_register("Centroid");
-	int8_t idx_rBRIEF_total = DWT_register("rBRIEF");
+	profiling_init();
 
-	DEBUG_VAR(idx_FAST_total);
-    DEBUG_VAR(idx_HARRIS_total);
-    DEBUG_VAR(idx_Centroid_total);
-    DEBUG_VAR(idx_rBRIEF_total);
-#endif
-	// Fast profiles
-#if FAST_PROFILING
-	int8_t idx_FAST_HSP=   DWT_register("FAST: HST");
-	DEBUG_VAR(idx_FAST_HSP);
-#endif
-
-	// Harris profiles
-
-#if HARRIS_PROFILING
-	int8_t idx_HARRIS_compute_matrix = DWT_register("HARRIS:matrix");
-	DEBUG_VAR(idx_HARRIS_compute_matrix);
-#endif
-
-	// Centroid Profiles
-
-#if CENTROID_PROFILING
-	int8_t idx_Centroid_momentumsl = DWT_register("Centroid:m01,m10");
-	int8_t idx_Centroid_atan2 = DWT_register("Centroid:atan2");
-
-	DEBUG_VAR(idx_Centroid_momentumsl);
-	DEBUG_VAR(idx_Centroid_atan2);
-#endif
-
-	// rBRIEF profiles
-
-#if rBRIEF_PROFILING
-	int8_t idx_rBRIEF_rotation = DWT_register("rBRIEF:rotation");
-	int8_t idx_rBRIEF_sample = DWT_register("rBRIEF:sample");
-
-	DEBUG_VAR(idx_rBRIEF_rotation);
-	DEBUG_VAR(idx_rBRIEF_sample);
-#endif
 
 
 	// Trying to get the image into ram
@@ -178,7 +135,7 @@ int main(void)
 
 	static const int num_pixels = IMAGE_HEIGTH * IMAGE_WIDTH;
 	// Kitty dataset has 1241 x 376
-	static const int32_t kitti_num_pixels = 2341 * 376;
+	static const int32_t kitti_num_pixels = 1241 * 376;
 
 
 
@@ -247,9 +204,15 @@ int main(void)
   //HAL_StatusTypeDef clk_result = HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4);
   //printf(osc_result);
   volatile uint32_t clock2 = HAL_RCC_GetHCLKFreq();
+  // SIMD here we gooooo
+  uint8_t b0 = 1;
+  uint8_t b1 = 2;
+  uint8_t b2 = 3;
+  uint8_t b3 = 4;
 
-
-
+  uint32_t packed8 = ((uint32_t)b3 << 24) | ((uint32_t)b2 << 16)
+                   | ((uint32_t)b1 <<  8) | b0;
+  uint32_t val = __UADD8(packed8,packed8);
   while (1)
   {
 
@@ -261,12 +224,18 @@ int main(void)
 	  BSP_LED_Toggle(LED_RED);
 	  HAL_Delay(LED_BLINK_WAIT);
 
+
+/*************************  ORB Calculations Start*******************************************/
 	  DWT_start(idx_ORB_total);
 
 	  ORB_extract_and_match();
 
 	  DWT_stop(idx_ORB_total);
 
+/*************************  ORB Calculations Start*******************************************/
+
+/*************************  Data Processing       *******************************************/
+	  DWT_process_data(idx_ORB_total);
 	  DWT_convert_all_profiles_to_timed();
 	  DWT_Profile_t *ORB_profile = DWT_get(idx_ORB_total);
 	  DWT_timed_pair_t *Orb_profile_timed =DWT_get_timed(idx_ORB_total);
@@ -287,8 +256,8 @@ int main(void)
 	  double us_per_pixel = (int)ORB_profile->avg/num_pixels;
 	  us_per_pixel = us_per_pixel/(SystemCoreClock / 1000000.0);
 	  double kitti_time_us = us_per_pixel*kitti_num_pixels;
-	  const char feature_msg[] = "Added the functionality to get a message in the SWV viewer with measurements. Primary use will be benchmarking and commit messages";
-	  const char performance_msg[] = "Broke the output messages into its own file to keep things clean";
+	  const char feature_msg[] = "None";
+	  const char performance_msg[] = "Added the improved testing for DWT to avoid the hash overhead when counting cycles";
 	  output_commit_message(feature_msg,performance_msg );
 
 	  uint32_t used = stack_usage();
@@ -309,7 +278,7 @@ int main(void)
 	  DEBUG_VAR(clock1);
 	  DEBUG_VAR(clock2);
 	  DEBUG_VAR(used);
-	  DEBUG_VAR(Orb_profile_timed);
+	  DEBUG_VAR(val);
 	  DEBUG_VAR(Orb_profile_timed);
 	  DEBUG_VAR(ORB_profile);
 	  DEBUG_VAR(Orb_profile_timed);

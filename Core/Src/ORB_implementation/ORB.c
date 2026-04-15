@@ -139,6 +139,7 @@ void ORB_extract_and_match(void){
 			float score = harris_score_compute(&g_orb_obj);
 
 #if ORB_PROFILING
+
 			DWT_stop(idx_HARRIS_total);
 			DWT_process_data(idx_HARRIS_total);
 /*************************  Harris Stop *******************************************/
@@ -153,6 +154,7 @@ void ORB_extract_and_match(void){
 			get_ORB_patch(&g_orb_obj, &patch);
 
 #if ORB_PROFILING
+
 			DWT_stop(idx_get_ORB_patch);
 			DWT_process_data(idx_get_ORB_patch);
 /*************************  Get ORB patch Stop *******************************************/

@@ -58,7 +58,9 @@ void profiling_init(void) {
 
 #if ORB_PROFILING
     idx_FAST_total     = DWT_register("FAST");
+    idx_is_feature_point_and_coords = DWT_register("Is feature point");
     idx_HARRIS_total   = DWT_register("Harris");
+    idx_get_ORB_patch  = DWT_register("Get ORB patch");
     idx_Centroid_total = DWT_register("Centroid");
     idx_rBRIEF_total   = DWT_register("rBRIEF");
 #endif

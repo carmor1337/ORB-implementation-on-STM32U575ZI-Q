@@ -23,7 +23,7 @@
 
 
 // Benchmarking configs
-#define ORB_PROFILING 	   1
+#define ORB_PROFILING 	   0
 #define FAST_PROFILING 	   0
 #define NMS_PROFILING      0
 #define HARRIS_PROFILING   0

@@ -93,7 +93,7 @@ bool FAST_init(void){
 
 
 
-
+// TODO: Figure out why i have 700 keypoints even though the threshold is huge
 __attribute__((hot)) inline bool FAST_detect(ORB_t *orb_obj){
 	// Compute 16 points and score
 	// Use the counters here

@@ -42,6 +42,27 @@ static const int32_t SOBEL_Y_VALUES[9] = {
 
 	};
 /*
+static const int32_t SOBEL_X_HORIZONTAL[3] ={
+	-1 , 0 , 1
+};
+
+static const int32_t SOBEL_X_VERTICAL[3] = {
+	1,
+	2,
+	1
+};
+
+static const int32_t SOBEL_Y_HORIZONTAL[3] = {
+		1, 2, 1
+};
+
+static const int32_t SOBEL_Y_VERTICAL[3] = {
+		-1,
+		0,
+		1
+};
+*/
+/*
 static const int32_t HARRIS_AREA_OFFSETS_3x3[9] = {
 	 -1 * IMAGE_WIDTH - 1, -1 * IMAGE_WIDTH + 0, -1 * IMAGE_WIDTH + 1,
 	 0  * IMAGE_WIDTH - 1, 0  * IMAGE_WIDTH + 0, 0  * IMAGE_WIDTH + 1,
@@ -99,7 +120,7 @@ float harris_score_compute(ORB_t *orb_obj){
 	// Construct M matrix
 	// score = R = det(M) - k*trace(M)^2
 	// return score
-	Matrix_values_t M= {0};
+	Matrix_values_t M = {0};
 #if HARRIS_PROFILING
 	DWT_start(DWT_Lookup("HARRIS:matrix"));
 #endif

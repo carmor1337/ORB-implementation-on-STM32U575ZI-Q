@@ -68,6 +68,8 @@ static const int32_t HARRIS_AREA_OFFSETS_3x3[9] = {
 	 1  * IMAGE_WIDTH - 1, 1  * IMAGE_WIDTH + 0, 1  * IMAGE_WIDTH + 1,
 
 	};
+*/
+
 static const int32_t HARRIS_AREA_OFFSETS_5x5[25] = {
 		-2 * IMAGE_WIDTH - 2, -2 * IMAGE_WIDTH - 1, -2 * IMAGE_WIDTH + 0, -2 * IMAGE_WIDTH + 1, -2 * IMAGE_WIDTH + 2,
 		-1 * IMAGE_WIDTH - 2, -1 * IMAGE_WIDTH - 1, -1 * IMAGE_WIDTH + 0, -1 * IMAGE_WIDTH + 1, -1 * IMAGE_WIDTH + 2,
@@ -76,8 +78,6 @@ static const int32_t HARRIS_AREA_OFFSETS_5x5[25] = {
 		2  * IMAGE_WIDTH - 2, 2  * IMAGE_WIDTH - 1, 2  * IMAGE_WIDTH + 0, 2  * IMAGE_WIDTH + 1, 2  * IMAGE_WIDTH + 2
 
 	};
-*/
-
 bool Harris_init(void){
 	return (true);
 }
@@ -97,7 +97,7 @@ static void compute_harris_matrix(uint8_t *image, int32_t index, Matrix_values_t
 		Ix = 0;
 		Iy = 0;
 
-
+		int32_t base = HARRIS_OFFSETS[i];
 
 		// Applies the sobel operator
 		// 1. Apply vertical Sobel to the 3 columns
@@ -118,7 +118,7 @@ static void compute_harris_matrix(uint8_t *image, int32_t index, Matrix_values_t
 			 gx[1] * SOBEL_X_HORIZONTAL[1] +
 			 gx[2] * SOBEL_X_HORIZONTAL[2];
 
-		Ix = gy[0] * SOBEL_Y_HORIZONTAL[0] +
+		Iy = gy[0] * SOBEL_Y_HORIZONTAL[0] +
 			 gy[1] * SOBEL_Y_HORIZONTAL[1] +
 			 gy[2] * SOBEL_Y_HORIZONTAL[2];
 			//Ix += (int64_t)image[(int64_t)idx + SOBEL_OFFSETS[j]] * SOBEL_X_VALUES[j];

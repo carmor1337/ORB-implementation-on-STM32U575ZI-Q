@@ -49,7 +49,7 @@ static double output_commit_overview(const char* feature_message,const char* per
 
 #if ORB_PROFILING
 
-	int num_of_sections = 4;
+	int num_of_sections = 6;
 	int8_t sections[] = {idx_FAST_total,
 			idx_is_feature_point_and_coords,
 			idx_HARRIS_total,

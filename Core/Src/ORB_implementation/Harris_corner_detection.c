@@ -126,7 +126,7 @@ static void compute_harris_matrix(uint8_t *image, int32_t index, Matrix_values_t
 	for (int row = 1; row < 1 + HARRIS_WINDOW_SIZE; row++){
 		for (int col = 0; col < HARRIS_WINDOW_SIZE ; col++){
 			// smoothing [ 1, 2, 1 ]
-			Ix = derrivative_buff[row - 1][col] +
+			Ix =  derrivative_buff[row - 1][col] +
 				  derrivative_buff[row][col] * 2 +
 				  derrivative_buff[row + 1][col];
 

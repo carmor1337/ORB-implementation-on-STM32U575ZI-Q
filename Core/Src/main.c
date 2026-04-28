@@ -256,8 +256,8 @@ int main(void)
 	  double us_per_pixel = (int)ORB_profile->avg/num_pixels;
 	  us_per_pixel = us_per_pixel/(SystemCoreClock / 1000000.0);
 	  double kitti_time_us = us_per_pixel*kitti_num_pixels;
-	  const char feature_msg[] = "Eliminated the not needed 0 rows";
-	  const char performance_msg[] = "Unrolled the loop and eliminated the dead calculations";
+	  const char feature_msg[] = "Implemented SIMD for Matrix calculation";
+	  const char performance_msg[] = "Unrolled the 3x3 kernel calculations and implemented SIMD for the calculations";
 	  output_commit_message(feature_msg,performance_msg );
 
 	  uint32_t used = stack_usage();

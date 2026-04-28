@@ -75,10 +75,25 @@ static void compute_harris_matrix(uint8_t *image, int32_t index, Matrix_values_t
 		Iy = 0;
 		idx = (int32_t) index + HARRIS_AREA_OFFSETS_5x5[i];
 		// Applies the sobel operator
-		for (int j = 0; j< 9; j++){
-			Ix += (int64_t)image[(int64_t)idx + SOBEL_OFFSETS[j]] * SOBEL_X_VALUES[j];
-			Iy += (int64_t)image[(int64_t)idx + SOBEL_OFFSETS[j]] * SOBEL_Y_VALUES[j];
-		}
+		//for (int j = 0; j< 9; j++){
+		//Ix += (int64_t)image[(int64_t)idx + SOBEL_OFFSETS[j]] * SOBEL_X_VALUES[j];
+		//Iy += (int64_t)image[(int64_t)idx + SOBEL_OFFSETS[j]] * SOBEL_Y_VALUES[j];
+		//}
+		Ix += (int64_t)image[(int64_t)idx + SOBEL_OFFSETS[0]] * SOBEL_X_VALUES[0];
+		Ix += (int64_t)image[(int64_t)idx + SOBEL_OFFSETS[2]] * SOBEL_X_VALUES[2];
+		Ix += (int64_t)image[(int64_t)idx + SOBEL_OFFSETS[3]] * SOBEL_X_VALUES[3];
+		Ix += (int64_t)image[(int64_t)idx + SOBEL_OFFSETS[5]] * SOBEL_X_VALUES[5];
+		Ix += (int64_t)image[(int64_t)idx + SOBEL_OFFSETS[6]] * SOBEL_X_VALUES[6];
+		Ix += (int64_t)image[(int64_t)idx + SOBEL_OFFSETS[8]] * SOBEL_X_VALUES[8];
+
+		Ix += (int64_t)image[(int64_t)idx + SOBEL_OFFSETS[0]] * SOBEL_Y_VALUES[0];
+		Ix += (int64_t)image[(int64_t)idx + SOBEL_OFFSETS[1]] * SOBEL_Y_VALUES[1];
+		Ix += (int64_t)image[(int64_t)idx + SOBEL_OFFSETS[2]] * SOBEL_Y_VALUES[2];
+		Ix += (int64_t)image[(int64_t)idx + SOBEL_OFFSETS[6]] * SOBEL_Y_VALUES[6];
+		Ix += (int64_t)image[(int64_t)idx + SOBEL_OFFSETS[7]] * SOBEL_Y_VALUES[7];
+		Ix += (int64_t)image[(int64_t)idx + SOBEL_OFFSETS[8]] * SOBEL_Y_VALUES[8];
+
+
 		Ixx += Ix*Ix;
 		Ixy += Ix*Iy;
 		Iyy += Iy*Iy;

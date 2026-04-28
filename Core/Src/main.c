@@ -224,12 +224,14 @@ int main(void)
 	  BSP_LED_Toggle(LED_RED);
 	  HAL_Delay(LED_BLINK_WAIT);
 
+
+/*************************  ORB Calculations Start*******************************************/
 	  DWT_start(idx_ORB_total);
 
 	  ORB_extract_and_match();
 
 	  DWT_stop(idx_ORB_total);
-	  DWT_process_data(idx_ORB_total);
+
 	  DWT_convert_all_profiles_to_timed();
 	  DWT_Profile_t *ORB_profile = DWT_get(idx_ORB_total);
 	  DWT_timed_pair_t *Orb_profile_timed =DWT_get_timed(idx_ORB_total);

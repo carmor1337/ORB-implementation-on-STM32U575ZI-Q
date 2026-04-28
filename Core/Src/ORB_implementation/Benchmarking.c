@@ -1,4 +1,3 @@
-// defines the macros needed for bencmarking with cycles
 
 #include "stdint.h"
 #include "main.h"
@@ -136,4 +135,5 @@ void DWT_convert_all_profiles_to_timed(void){
 		dwt_timed_registry[i] = DWT_convert_to_timed(i);
 	}
 }
+
 

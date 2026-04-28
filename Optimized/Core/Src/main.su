@@ -1,7 +1,7 @@
-../Core/Src/main.c:81:27:_write	0	static
-../Core/Src/main.c:91:6:stack_paint	0	static,ignoring_inline_asm
-../Core/Src/main.c:100:10:stack_usage	4	static
-../Core/Src/main.c:352:6:SystemClock_Config	136	static,ignoring_inline_asm
-../Core/Src/main.c:116:5:main	136	static,ignoring_inline_asm
-../Core/Src/main.c:441:6:HAL_TIM_PeriodElapsedCallback	0	static
-../Core/Src/main.c:459:6:Error_Handler	0	static,ignoring_inline_asm
+../Core/Src/main.c:80:6:_write	0	static
+../Core/Src/main.c:90:6:stack_paint	0	static,ignoring_inline_asm
+../Core/Src/main.c:99:10:stack_usage	4	static
+../Core/Src/main.c:343:6:SystemClock_Config	136	static,ignoring_inline_asm
+../Core/Src/main.c:115:5:main	248	static,ignoring_inline_asm
+../Core/Src/main.c:432:6:HAL_TIM_PeriodElapsedCallback	0	static
+../Core/Src/main.c:450:6:Error_Handler	0	static,ignoring_inline_asm

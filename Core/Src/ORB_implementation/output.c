@@ -50,7 +50,12 @@ static double output_commit_overview(const char* feature_message,const char* per
 #if ORB_PROFILING
 
 	int num_of_sections = 4;
-	int8_t sections[] = {idx_FAST_total,idx_HARRIS_total,idx_Centroid_total,idx_rBRIEF_total };
+	int8_t sections[] = {idx_FAST_total,
+			idx_is_feature_point_and_coords,
+			idx_HARRIS_total,
+			idx_get_ORB_patch,
+			idx_Centroid_total,
+			idx_rBRIEF_total };
 	for (int i= 0; i < num_of_sections; i++){
 		DWT_timed_pair_t* times_profile = DWT_get_timed(sections[i]);
 		char label[COL_OVERVIEW_SECTION_NAME + 2];

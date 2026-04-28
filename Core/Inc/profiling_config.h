@@ -16,7 +16,9 @@ extern int8_t idx_ORB_total;
 // --- ORB sub-profiles ---
 #if ORB_PROFILING
 extern int8_t idx_FAST_total;
+extern int8_t idx_is_feature_point_and_coords;
 extern int8_t idx_HARRIS_total;
+extern int8_t idx_get_ORB_patch;
 extern int8_t idx_Centroid_total;
 extern int8_t idx_rBRIEF_total;
 #endif
@@ -52,3 +54,4 @@ void profiling_init(void);
 
 
 #endif /* INC_PROFILING_CONFIG_H_ */
+

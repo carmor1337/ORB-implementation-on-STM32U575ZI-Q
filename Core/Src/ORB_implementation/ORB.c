@@ -194,6 +194,7 @@ void ORB_extract_and_match(void){
 				  DWT_process_data(idx_FAST_get_result);
 				  DWT_process_data(idx_FAST_consecutive_check);
 #endif
+*/
 /*************************  rBRIEF Stop *******************************************/
 			}
 	}

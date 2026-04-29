@@ -49,13 +49,25 @@ void compute_intensity_centroid(uint8_t *image, ORB_feature_point_t *feature_poi
 	const uint8_t * __restrict__ p_center_pointer = image + pixel_index;
 	int32_t m10 = 0; // Sum of x*I for all x,y
 	int32_t m01 = 0; // Sum of y*I for all x,y
-	for (int32_t y = 0; y <= 15; y++){
+
+
+	// Fist row
+	for (int x = 1; x <= u_max[0]; x++){
+		m10 +=x * ( p_center_pointer[x] - p_center_pointer[-x]);
+	}
+	for (int32_t y = 1; y <= 15; y++){
 		const uint8_t *row_pointer_plus  = p_center_pointer + y*IMAGE_WIDTH;
 		const uint8_t *row_pointer_minus = p_center_pointer - y*IMAGE_WIDTH;
 
-				for (int x = -u_max[y]; x <= u_max[y]; x++){
-					m10 += x * (row_pointer_plus[x] + row_pointer_minus[x]);
-					m01 += y * (row_pointer_plus[x] - row_pointer_minus[x]);
+				for (int x = 1; x <= u_max[y]; x++){
+					uint8_t pos_x_pos_y = row_pointer_plus[  x];
+					uint8_t neg_x_pos_y = row_pointer_plus[ -x];
+					uint8_t pos_x_neg_y = row_pointer_minus[ x];
+					uint8_t neg_x_neg_y = row_pointer_minus[-x];
+
+
+					m10 += x * ((pos_x_pos_y - neg_x_pos_y) + (pos_x_neg_y - neg_x_neg_y));
+					m01 += y * ((pos_x_pos_y + neg_x_pos_y) - (pos_x_neg_y + neg_x_neg_y));
 				}
 	}
 #if CENTROID_PROFILING

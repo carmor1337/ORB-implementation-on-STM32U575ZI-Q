@@ -257,7 +257,7 @@ int main(void)
 	  us_per_pixel = us_per_pixel/(SystemCoreClock / 1000000.0);
 	  double kitti_time_us = us_per_pixel*kitti_num_pixels;
 	  const char feature_msg[] = "Semi Separable Sobel";
-	  const char performance_msg[] = "Separated the horizontal pass from the vertical pass, reducing image access time and comparisons";
+	  const char performance_msg[] = "Integrated SIMD into the semi separable sobel";
 	  output_commit_message(feature_msg,performance_msg );
 
 	  uint32_t used = stack_usage();

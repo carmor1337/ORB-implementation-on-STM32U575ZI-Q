@@ -34,11 +34,10 @@ int8_t idx_FAST_consecutive_check = -1;
 
 // --- Harris profiles ---
 #if HARRIS_PROFILING
-int8_t idx_HARRIS_compute_matrix = -1;
-int8_t idx_HARRIS_loop_setup     = 1;
-int8_t idx_HARRIS_calculate_x	 = 1;
-int8_t idx_HARRIS_calculate_y    = -1;
-int8_t idx_HARRIS_accumulate     = -1;
+int8_t idx_HARRIS_compute_matrix  = -1;
+int8_t idx_HARRIS_loop_setup      = 1;
+int8_t idx_HARRIS_horizontal_pass = 1;
+int8_t idx_HARRIS_vertical_pass   = -1;
 #endif
 
 // --- Centroid profiles ---
@@ -79,11 +78,10 @@ void profiling_init(void) {
 #endif
 
 #if HARRIS_PROFILING
-    idx_HARRIS_compute_matrix = DWT_register("HARRIS: Matrix");
-    idx_HARRIS_loop_setup     = DWT_register("HARRIS: Loop Setup");
-    idx_HARRIS_calculate_x	  = DWT_register("HARRIS: Calc X");
-    idx_HARRIS_calculate_y    = DWT_register("HARRIS: Calc y");
-    idx_HARRIS_accumulate     = DWT_register("HARRIS: Accumulate");
+    idx_HARRIS_compute_matrix  = DWT_register("HARRIS: Matrix");
+    idx_HARRIS_loop_setup      = DWT_register("HARRIS: Loop Setup");
+    idx_HARRIS_horizontal_pass = DWT_register("HARRIS: Vertical");
+    idx_HARRIS_vertical_pass   = DWT_register("HARRIS: Horizontal");
 #endif
 
 #if CENTROID_PROFILING

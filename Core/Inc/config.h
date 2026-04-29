@@ -74,7 +74,7 @@
 
 // Harris Config
 #define HARRIS_K           0.04
-#define HARRIS_WINDOW_SIZE 5
+#define HARRIS_WINDOW_SIZE 7
 
 // Centroid Config
 

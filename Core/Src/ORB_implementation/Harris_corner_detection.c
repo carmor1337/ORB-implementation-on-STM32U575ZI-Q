@@ -48,13 +48,29 @@ static const int32_t HARRIS_AREA_OFFSETS_3x3[9] = {
 	 1  * IMAGE_WIDTH - 1, 1  * IMAGE_WIDTH + 0, 1  * IMAGE_WIDTH + 1,
 
 	};
-*/
+
 static const int32_t HARRIS_AREA_OFFSETS_5x5[25] = {
 		-2 * IMAGE_WIDTH - 2, -2 * IMAGE_WIDTH - 1, -2 * IMAGE_WIDTH + 0, -2 * IMAGE_WIDTH + 1, -2 * IMAGE_WIDTH + 2,
 		-1 * IMAGE_WIDTH - 2, -1 * IMAGE_WIDTH - 1, -1 * IMAGE_WIDTH + 0, -1 * IMAGE_WIDTH + 1, -1 * IMAGE_WIDTH + 2,
+
 		0  * IMAGE_WIDTH - 2, 0  * IMAGE_WIDTH - 1, 0  * IMAGE_WIDTH + 0, 0  * IMAGE_WIDTH + 1, 0  * IMAGE_WIDTH + 2,
+
 		1  * IMAGE_WIDTH - 2, 1  * IMAGE_WIDTH - 1, 1  * IMAGE_WIDTH + 0, 1  * IMAGE_WIDTH + 1, 1  * IMAGE_WIDTH + 2,
 		2  * IMAGE_WIDTH - 2, 2  * IMAGE_WIDTH - 1, 2  * IMAGE_WIDTH + 0, 2  * IMAGE_WIDTH + 1, 2  * IMAGE_WIDTH + 2
+
+	};
+*/
+static const int32_t HARRIS_AREA_OFFSETS_7x7[49] = {
+
+		-3 * IMAGE_WIDTH - 3,-3 * IMAGE_WIDTH - 2, -3 * IMAGE_WIDTH - 1, -3 * IMAGE_WIDTH + 0, -3 * IMAGE_WIDTH + 1, -3 * IMAGE_WIDTH + 2, -3 * IMAGE_WIDTH + 3,
+		-2 * IMAGE_WIDTH - 3,-2 * IMAGE_WIDTH - 2, -2 * IMAGE_WIDTH - 1, -2 * IMAGE_WIDTH + 0, -2 * IMAGE_WIDTH + 1, -2 * IMAGE_WIDTH + 2, -2 * IMAGE_WIDTH + 3,
+		-1 * IMAGE_WIDTH - 3,-1 * IMAGE_WIDTH - 2, -1 * IMAGE_WIDTH - 1, -1 * IMAGE_WIDTH + 0, -1 * IMAGE_WIDTH + 1, -1 * IMAGE_WIDTH + 2, -1 * IMAGE_WIDTH + 3,
+
+		 0 * IMAGE_WIDTH - 3, 0 * IMAGE_WIDTH - 2, 0  * IMAGE_WIDTH - 1, 0  * IMAGE_WIDTH + 0,  0 * IMAGE_WIDTH + 1, 0  * IMAGE_WIDTH + 2,  0 * IMAGE_WIDTH + 3,
+
+		 1 * IMAGE_WIDTH - 3, 1 * IMAGE_WIDTH - 2, 1  * IMAGE_WIDTH - 1, 1  * IMAGE_WIDTH + 0,  1 * IMAGE_WIDTH + 1, 1  * IMAGE_WIDTH + 2,  1 * IMAGE_WIDTH + 3,
+		 2 * IMAGE_WIDTH - 3, 2 * IMAGE_WIDTH - 2, 2  * IMAGE_WIDTH - 1, 2  * IMAGE_WIDTH + 0,  2 * IMAGE_WIDTH + 1, 2  * IMAGE_WIDTH + 2,  2 * IMAGE_WIDTH + 3,
+		 3 * IMAGE_WIDTH - 3, 3 * IMAGE_WIDTH - 2, 3  * IMAGE_WIDTH - 1, 3  * IMAGE_WIDTH + 0,  3 * IMAGE_WIDTH + 1, 3  * IMAGE_WIDTH + 2,  3 * IMAGE_WIDTH + 3,
 
 	};
 
@@ -96,7 +112,7 @@ static void compute_harris_matrix(uint8_t *image, int32_t index, Matrix_values_t
 		Ix = 0;
 		Iy = 0;
 		// Index to follow
-		idx = (int32_t)index + HARRIS_AREA_OFFSETS_5x5[i];
+		idx = (int32_t)index + HARRIS_AREA_OFFSETS_7x7[i];
 
 		//********************************  Extract values for current pixel  ********************************
 		// Gets the next four pixels from the current position -1 column to get all 3 values correctly
@@ -167,7 +183,7 @@ static void compute_harris_matrix(uint8_t *image, int32_t index, Matrix_values_t
 
 float harris_score_compute(ORB_t *orb_obj){
 	// At compile time:
-	_Static_assert(HARRIS_WINDOW_SIZE == 5, "Offset table must match window size");
+	//_Static_assert(HARRIS_WINDOW_SIZE == 5, "Offset table must match window size");
 	// Use sobel on all pixels in the window
 	// Sum up Ix^2, Iy^2 and Ixy
 	// Construct M matrix

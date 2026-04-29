@@ -122,8 +122,9 @@ static void compute_harris_matrix(uint8_t *image, int32_t index, Matrix_values_t
 	int32_t  Ixx = 0;
 	int32_t  Ixy = 0;
 	int32_t  Iyy = 0;
-	int16_t  smooth_buff       [HARRIS_WINDOW_SIZE + 2][HARRIS_WINDOW_SIZE]; // Sobel [ 1, 2, 1 ]
-	int16_t  derrivative_buff  [HARRIS_WINDOW_SIZE + 2][HARRIS_WINDOW_SIZE]; // Sobel [-1, 0, 1 ]
+	// HARRIS_WINDOW_SIZE+1 is to align the bytes since HARRIS_WINDOW_SIZE is always odd
+	int16_t  smooth_buff       [HARRIS_WINDOW_SIZE + 2][HARRIS_WINDOW_SIZE+1] __attribute__((aligned(4))); // Sobel [ 1, 2, 1 ]
+	int16_t  derrivative_buff  [HARRIS_WINDOW_SIZE + 2][HARRIS_WINDOW_SIZE+1]  __attribute__((aligned(4)));// Sobel [-1, 0, 1 ]
 	const uint32_t sobel_x_mask  = 0x0001FFFF;
 	const uint8_t * __restrict__ row_ptr  = image + index + g_first_patch_pixel_offset;
 

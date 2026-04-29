@@ -8,6 +8,7 @@
 
 #include "Benchmarking.h"
 #include "Benchmarking_map.h"
+#include "profiling_config.h"
 /*
  * apply the 3x3 Sobel operator to each pixel within a 7x7 window around fast feature point
  *
@@ -109,6 +110,9 @@ static void compute_harris_matrix(uint8_t *image, int32_t index, Matrix_values_t
 		 * 3. Do the simd calculation
 		 */
 	for (int i = 0; i < (HARRIS_WINDOW_SIZE*HARRIS_WINDOW_SIZE); i++){
+#if HARRIS_PROFILING
+		DWT_start(idx_HARRIS_loop_setup);
+#endif
 		Ix = 0;
 		Iy = 0;
 		// Index to follow
@@ -140,9 +144,16 @@ static void compute_harris_matrix(uint8_t *image, int32_t index, Matrix_values_t
 		//uint32_t xx_p5 = __UXTB16(__ROR(packed,     8)); never uese
 		uint32_t xx_p8 = __UXTB16(__ROR(packed_bot, 8));
 
+#if HARRIS_PROFILING
+			DWT_stop(idx_HARRIS_loop_setup);
+			DWT_process_data(idx_HARRIS_loop_setup);
+#endif
+
+
 		//********************************  Calculate Sobel values  ********************************
-
-
+#if HARRIS_PROFILING
+		DWT_start(idx_HARRIS_calculate_x);
+#endif
 		// **** X values ****
 		// Corner mask is  [31-16] = 1 and [15-0] = -1
 		uint32_t corner_mask_for_x = 0x0001FFFF; //
@@ -151,7 +162,14 @@ static void compute_harris_matrix(uint8_t *image, int32_t index, Matrix_values_t
 		// P6*2-P4*2 = (P6-P4) * 2
 		Ix += (int32_t)__SMLAD(p6_p4, 0x0001FFFF, 0) * 2;
 
+#if HARRIS_PROFILING
+		DWT_stop(idx_HARRIS_calculate_x);
+		DWT_process_data(idx_HARRIS_calculate_x);
+#endif
 
+#if HARRIS_PROFILING
+		DWT_start(idx_HARRIS_calculate_y);
+#endif
 		// **** Y values ****
 		// Calculating corners ( 1 coefficients)
 		uint32_t diff_corners = __SSUB16(p9_p7, p3_p1);
@@ -164,12 +182,24 @@ static void compute_harris_matrix(uint8_t *image, int32_t index, Matrix_values_t
 		Iy = (int32_t)__SMLAD(diff_corners, 0x00010001, 0);
 		Iy += (int16_t)(diff_center_y & 0xFFFF) * 2;
 
+#if HARRIS_PROFILING
+		DWT_stop(idx_HARRIS_calculate_y);
+		DWT_process_data(idx_HARRIS_calculate_y);
 
+#endif
 
+#if HARRIS_PROFILING
+		DWT_start(idx_HARRIS_accumulate);
+#endif
 		//********************************  Add to Ixx, Ixy, Iyy  ********************************
 		Ixx += Ix * Ix;
 		Ixy += Ix * Iy;
 		Iyy += Iy * Iy;
+
+#if HARRIS_PROFILING
+		DWT_stop(idx_HARRIS_accumulate);
+		DWT_process_data(idx_HARRIS_accumulate);
+#endif
 	}
 
 
@@ -191,13 +221,13 @@ float harris_score_compute(ORB_t *orb_obj){
 	// return score
 	Matrix_values_t M= {0};
 #if HARRIS_PROFILING
-	DWT_start(DWT_Lookup("HARRIS:matrix"));
+	DWT_start(idx_HARRIS_compute_matrix);
 #endif
 
 	compute_harris_matrix(orb_obj->image, (int32_t)orb_obj->pixel_index, &M);
 
 #if HARRIS_PROFILING
-	DWT_stop(DWT_Lookup("HARRIS:matrix"));
+	DWT_stop(idx_HARRIS_compute_matrix);
 #endif
 	float det   = ((float)M.Ixx * (float)M.Iyy) - ((float)M.Ixy * (float)M.Ixy);
 	float trace = (float)((float)M.Ixx + (float)M.Iyy);

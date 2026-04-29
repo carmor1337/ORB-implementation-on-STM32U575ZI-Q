@@ -36,6 +36,10 @@ extern int8_t idx_FAST_consecutive_check;
 // --- Harris profiles ---
 #if HARRIS_PROFILING
 extern int8_t idx_HARRIS_compute_matrix;
+extern int8_t idx_HARRIS_loop_setup;
+extern int8_t idx_HARRIS_calculate_x;
+extern int8_t idx_HARRIS_calculate_y;
+extern int8_t idx_HARRIS_accumulate;
 #endif
 
 // --- Centroid profiles ---

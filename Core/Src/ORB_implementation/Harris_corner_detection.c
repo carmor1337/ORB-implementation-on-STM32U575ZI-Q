@@ -117,16 +117,18 @@ bool Harris_init(void){
 }
 
 static void compute_harris_matrix(uint8_t *image, int32_t index, Matrix_values_t* matrix_values ){
+
+	const uint32_t sobel_x_mask  = 0x0001FFFF;
+	const uint8_t * __restrict__ row_ptr  = image + index + g_first_patch_pixel_offset;
+
 	int32_t  Ix  = 0;
 	int32_t  Iy  = 0;
 	int32_t  Ixx = 0;
 	int32_t  Ixy = 0;
 	int32_t  Iyy = 0;
 	// HARRIS_WINDOW_SIZE+1 is to align the bytes since HARRIS_WINDOW_SIZE is always odd
-	int16_t  smooth_buff       [HARRIS_WINDOW_SIZE + 2][HARRIS_WINDOW_SIZE+1] __attribute__((aligned(4))); // Sobel [ 1, 2, 1 ]
-	int16_t  derrivative_buff  [HARRIS_WINDOW_SIZE + 2][HARRIS_WINDOW_SIZE+1]  __attribute__((aligned(4)));// Sobel [-1, 0, 1 ]
-	const uint32_t sobel_x_mask  = 0x0001FFFF;
-	const uint8_t * __restrict__ row_ptr  = image + index + g_first_patch_pixel_offset;
+	int16_t  smooth_buff       [HARRIS_SOBEL_SIZE][HARRIS_WINDOW_SIZE+1] __attribute__((aligned(4))); // Sobel [ 1, 2, 1 ]
+	int16_t  derrivative_buff  [HARRIS_SOBEL_SIZE][HARRIS_WINDOW_SIZE+1]  __attribute__((aligned(4)));// Sobel [-1, 0, 1 ]
 
 
 	// ****Getting values ****
@@ -136,7 +138,7 @@ static void compute_harris_matrix(uint8_t *image, int32_t index, Matrix_values_t
 	 * p9 p10 p11 p12
 	 * p6 is the pixel of intrest position
 	 */
-
+	//TODO: Implement the rotating buffer for the images.
 	// Step 1 do horizontal passes of all pixels
 	for (int row = 0; row < HARRIS_WINDOW_SIZE + 2; row++){
 		for (int col = 0; col < HARRIS_WINDOW_SIZE; col++){

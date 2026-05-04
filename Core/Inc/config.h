@@ -28,7 +28,7 @@
 #define FAST_PROFILING 	   0
 #define NMS_PROFILING      0
 #define HARRIS_PROFILING   0
-#define CENTROID_PROFILING 0
+#define CENTROID_PROFILING 1
 #define rBRIEF_PROFILING   0
 
 /*

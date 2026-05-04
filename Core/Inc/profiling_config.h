@@ -40,7 +40,7 @@ extern int8_t idx_HARRIS_compute_matrix;
 
 // --- Centroid profiles ---
 #if CENTROID_PROFILING
-extern int8_t idx_Centroid_momentumsl;
+extern int8_t idx_Centroid_momentums;
 extern int8_t idx_Centroid_atan2;
 #endif
 

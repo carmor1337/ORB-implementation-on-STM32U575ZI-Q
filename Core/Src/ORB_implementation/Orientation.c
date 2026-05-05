@@ -63,9 +63,10 @@ void compute_intensity_centroid(uint8_t *image, ORB_feature_point_t *feature_poi
 		int16_t x = 1;
 
 			for (; x + 3 <= u; x += 4){
+				// Fetch the bytes to be compared
 				uint32_t pos_pos_word	= __UNALIGNED_UINT32_READ(p_row_plus  + x);
 				uint32_t pos_neg_word	= __UNALIGNED_UINT32_READ(p_row_minus + x);
-
+				// __REV reverses the position so that they are aligned with the positive values
 				uint32_t neg_pos_word	= __REV(__UNALIGNED_UINT32_READ(p_row_plus  - x - 3));
 				uint32_t neg_neg_word	= __REV(__UNALIGNED_UINT32_READ(p_row_minus - x - 3));
 
@@ -83,9 +84,9 @@ void compute_intensity_centroid(uint8_t *image, ORB_feature_point_t *feature_poi
 				uint32_t nn_31 = __UXTB16(__ROR(neg_neg_word, 8));
 
 
-
+				/********************************   M10 calculation ********************/
 		        // m10: x * ((I(x,+y)-I(-x,+y)) + (I(x,-y)-I(-x,-y)))
-		        uint32_t delta_x_py_20 = __SSUB16(pp_20, np_20); // [I(x+2,+y)-I(-(x+2),+y), I(x,+y)-I(-x,+y)]
+		        uint32_t delta_x_py_20 = __SSUB16(pp_20, np_20);
 		        uint32_t delta_x_py_31 = __SSUB16(pp_31, np_31);
 		        uint32_t delta_x_ny_20 = __SSUB16(pn_20, nn_20);
 		        uint32_t delta_x_ny_31 = __SSUB16(pn_31, nn_31);
@@ -99,9 +100,9 @@ void compute_intensity_centroid(uint8_t *image, ORB_feature_point_t *feature_poi
 				m10 = (int32_t)__SMLAD(delta_x_20, x_packed_20, (uint32_t)m10);
 				m10 = (int32_t)__SMLAD(delta_x_31, x_packed_31, (uint32_t)m10);
 
-				/********************************   M01 calcualtion ********************/
-				// m10: x * ((I(x,+y)-I(-x,+y)) + (I(x,-y)-I(-x,-y)))
-				uint32_t delta_y_py_20 = __SADD16(pp_20, np_20); // [I(x+2,+y)-I(-(x+2),+y), I(x,+y)-I(-x,+y)]
+				/********************************   M01 calculation ********************/
+				// m01: y * ((I(x,+y) + I(-x,+y)) - (I(x,-y) + I(-x,-y)))
+				uint32_t delta_y_py_20 = __SADD16(pp_20, np_20);
 				uint32_t delta_y_py_31 = __SADD16(pp_31, np_31);
 				uint32_t delta_y_ny_20 = __SADD16(pn_20, nn_20);
 				uint32_t delta_y_ny_31 = __SADD16(pn_31, nn_31);

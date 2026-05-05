@@ -256,8 +256,8 @@ int main(void)
 	  double us_per_pixel = (int)ORB_profile->avg/num_pixels;
 	  us_per_pixel = us_per_pixel/(SystemCoreClock / 1000000.0);
 	  double kitti_time_us = us_per_pixel*kitti_num_pixels;
-	  const char feature_msg[] = "Improved the centroid calculation by using symmetry";
-	  const char performance_msg[] = "Further halved by using x symmetry as well. Handle the special case y=0";
+	  const char feature_msg[] = "Added SIMD";
+	  const char performance_msg[] = "Added SIMD for the calculations";
 	  output_commit_message(feature_msg,performance_msg );
 
 	  uint32_t used = stack_usage();

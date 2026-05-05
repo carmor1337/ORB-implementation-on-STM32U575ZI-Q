@@ -113,8 +113,8 @@ void compute_intensity_centroid(uint8_t *image, ORB_feature_point_t *feature_poi
 				uint32_t y_packed_20 = ((uint32_t)(y + 2) << 16) | (uint32_t)(y);
 				uint32_t y_packed_31 = ((uint32_t)(y + 3) << 16) | (uint32_t)(y + 1);
 
-				m01 = (int32_t)__SMLAD(delta_y_20, y_packed_20, (uint32_t)m01);
-				m01 = (int32_t)__SMLAD(delta_y_31, y_packed_31, (uint32_t)m01);
+				y_sum = (int32_t)__SMLAD(delta_y_20, y_packed_20, (uint32_t)y_sum);
+				y_sum = (int32_t)__SMLAD(delta_y_31, y_packed_31, (uint32_t)y_sum);
 
 				//y_sum +=     ((px_py + nx_py) - (px_ny + nx_ny));
 			}

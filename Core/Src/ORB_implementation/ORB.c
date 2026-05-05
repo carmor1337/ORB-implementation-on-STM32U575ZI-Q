@@ -168,6 +168,10 @@ void ORB_extract_and_match(void){
 
 			compute_intensity_centroid(&g_orb_obj, fp, g_orb_obj.pixel_index );
 
+#if CENTROID_PROFILING
+			DWT_process_data(idx_Centroid_momentums);
+			DWT_process_data(idx_Centroid_atan2);
+#endif
 #if ORB_PROFILING
 			DWT_stop(idx_Centroid_total);
 			DWT_process_data(idx_Centroid_total);

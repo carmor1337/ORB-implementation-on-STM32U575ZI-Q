@@ -39,8 +39,8 @@ int8_t idx_HARRIS_compute_matrix = -1;
 
 // --- Centroid profiles ---
 #if CENTROID_PROFILING
-int8_t idx_Centroid_momentumsl = -1;
-int8_t idx_Centroid_atan2      = -1;
+int8_t idx_Centroid_momentums = -1;
+int8_t idx_Centroid_atan2     = -1;
 #endif
 
 // --- rBRIEF profiles ---
@@ -79,7 +79,7 @@ void profiling_init(void) {
 #endif
 
 #if CENTROID_PROFILING
-    idx_Centroid_momentumsl = DWT_register("Centroid:m01,m10");
+    idx_Centroid_momentums  = DWT_register("Centroid:m01,m10");
     idx_Centroid_atan2      = DWT_register("Centroid:atan2");
 #endif
 

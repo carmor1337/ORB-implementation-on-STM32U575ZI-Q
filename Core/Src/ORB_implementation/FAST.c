@@ -26,13 +26,6 @@
  * 		Check against threshold
  *
  *
- *Index lookup names
-"FAST: Setup"
-"FAST: HST"
-"FAST: Prepare calculations"
-"FAST: Do calculations"
-"FAST: Aggregate result"
-"FAST: Consecutive check"
  *
  *
  *
@@ -51,6 +44,9 @@
 #endif
 
 volatile uint32_t g_high_speed_test_rejections = 0;
+volatile uint32_t g_concecutive_rejections = 0;
+//volatile uint32_t g_concecutive_rejections = 0;
+
 
 static const int32_t CIRCLE_OFFSETS[16] = {
 	    -3*IMAGE_WIDTH+0, -3*IMAGE_WIDTH+1, -2*IMAGE_WIDTH+2, -1*IMAGE_WIDTH+3,
@@ -81,6 +77,7 @@ static inline uint32_t usub8_sel(uint32_t a, uint32_t b, uint32_t t, uint32_t f)
         : /* GE flags are implicit, no need to list */
     );
     return (result);
+
 }
 
 
@@ -91,7 +88,12 @@ bool FAST_init(void){
 	return (true);
 }
 
-
+uint32_t num_of_concecutive_rejections(void){
+	return g_concecutive_rejections;
+}
+uint32_t num_of_high_speed_rejections(void){
+	return g_high_speed_test_rejections;
+}
 
 // TODO: Figure out why i have 700 keypoints even though the threshold is huge
 __attribute__((hot)) inline bool FAST_detect(ORB_t *orb_obj){
@@ -108,15 +110,14 @@ __attribute__((hot)) inline bool FAST_detect(ORB_t *orb_obj){
 	const uint8_t * __restrict__ img = orb_obj->image + idx;
 
 
-
-
-
 	uint8_t origin_value = img[0];
 
 	// Clamping to avid overflows
-
+	//uint8_t origin_value_plus_threshold  = (uint8_t)MAX(origin_value - ILLUMINATION_THRESHOLD,0);
+	//uint8_t origin_value_minus_threshold = (uint8_t)MAX(origin_value  +ILLUMINATION_THRESHOLD,0);
 	uint8_t origin_value_plus_threshold  = (uint8_t)__USAT((int32_t)origin_value + ILLUMINATION_THRESHOLD, 8);
 	uint8_t origin_value_minus_threshold = (uint8_t)__USAT((int32_t)origin_value - ILLUMINATION_THRESHOLD, 8);
+
 	// Adding calculated thresholds
 	// Instead of 4 shifts + 3 ORs:
 	uint32_t origin_value_plus_threshold_packed  = (uint32_t)origin_value_plus_threshold  * 0x01010101U;
@@ -162,6 +163,7 @@ __attribute__((hot)) inline bool FAST_detect(ORB_t *orb_obj){
 #if FAST_PROFILING
 		DWT_stop(idx_FAST_HSP);
 #endif
+		g_high_speed_test_rejections ++;
 		return (false);
 	}
 
@@ -194,6 +196,7 @@ __attribute__((hot)) inline bool FAST_detect(ORB_t *orb_obj){
 
 // Already have index 0,4,8,12
 // Packing all the bits for maths
+
 	uint32_t packed1 = ((uint32_t)img[CIRCLE_OFFSETS[0]] << 24) |
 					   ((uint32_t)img[CIRCLE_OFFSETS[1]] << 16) |
 					   ((uint32_t)img[CIRCLE_OFFSETS[2]] <<  8) |
@@ -213,7 +216,28 @@ __attribute__((hot)) inline bool FAST_detect(ORB_t *orb_obj){
 						  ((uint32_t)img[CIRCLE_OFFSETS[13]] << 16) |
 						  ((uint32_t)img[CIRCLE_OFFSETS[14]] <<  8) |
 						  ((uint32_t)img[CIRCLE_OFFSETS[15]] <<  0);
+	/*
 
+	uint32_t packed1 = ((uint32_t)img[CIRCLE_OFFSETS[3]] << 24) |
+	                   ((uint32_t)img[CIRCLE_OFFSETS[2]] << 16) |
+	                   ((uint32_t)img[CIRCLE_OFFSETS[1]] <<  8) |
+	                   ((uint32_t)img[CIRCLE_OFFSETS[0]] <<  0);
+
+	uint32_t packed2 = ((uint32_t)img[CIRCLE_OFFSETS[7]] << 24) |
+	                   ((uint32_t)img[CIRCLE_OFFSETS[6]] << 16) |
+	                   ((uint32_t)img[CIRCLE_OFFSETS[5]] <<  8) |
+	                   ((uint32_t)img[CIRCLE_OFFSETS[4]] <<  0);
+
+	uint32_t packed3 = ((uint32_t)img[CIRCLE_OFFSETS[11]] << 24) |
+	                   ((uint32_t)img[CIRCLE_OFFSETS[10]] << 16) |
+	                   ((uint32_t)img[CIRCLE_OFFSETS[9]]  <<  8) |
+	                   ((uint32_t)img[CIRCLE_OFFSETS[8]]  <<  0);
+
+	uint32_t packed4 = ((uint32_t)img[CIRCLE_OFFSETS[15]] << 24) |
+	                   ((uint32_t)img[CIRCLE_OFFSETS[14]] << 16) |
+	                   ((uint32_t)img[CIRCLE_OFFSETS[13]] <<  8) |
+	                   ((uint32_t)img[CIRCLE_OFFSETS[12]] <<  0);
+	 * */
 #if FAST_PROFILING
 	DWT_stop(idx_FAST_prep_calc);
 	DWT_process_data(idx_FAST_prep_calc);
@@ -241,7 +265,7 @@ __attribute__((hot)) inline bool FAST_detect(ORB_t *orb_obj){
 	else{
 		result_1 = usub8_sel(origin_value_minus_threshold_packed, packed1, 0x01010101U, 0U);
 		result_2 = usub8_sel(origin_value_minus_threshold_packed, packed2, 0x01010101U, 0U);
-		result_3 = usub8_sel(origin_value_minus_threshold_packed, packed4, 0x01010101U, 0U);
+		result_3 = usub8_sel(origin_value_minus_threshold_packed, packed3, 0x01010101U, 0U);
 		result_4 = usub8_sel(origin_value_minus_threshold_packed, packed4, 0x01010101U, 0U);
 
 	}
@@ -256,36 +280,36 @@ __attribute__((hot)) inline bool FAST_detect(ORB_t *orb_obj){
 	DWT_start(idx_FAST_get_result);
 #endif
 	//
+	/*
 	uint16_t result_total = (uint16_t)(
 	    BYTES_TO_NIBBLE(result_1)        |
 	   (BYTES_TO_NIBBLE(result_2) <<  4) |
 	   (BYTES_TO_NIBBLE(result_3) <<  8) |
 	   (BYTES_TO_NIBBLE(result_4) << 12)
 	);
-	/*
-	// High speed test
-	result_total |= ((uint16_t)((high_speed_test_result >> 24) & 0xFF) << 0) |
-					((uint16_t)((high_speed_test_result >> 16) & 0xFF) << 4) |
-					((uint16_t)((high_speed_test_result >> 8)  & 0xFF) << 8) |
-					((uint16_t)((high_speed_test_result >> 0)  & 0xFF) << 12);
-	// Package 1
-	result_total  |= ((uint16_t)((result_1 >> 24) & 0xFF) << 1) |
-			         ((uint16_t)((result_1 >> 16) & 0xFF) << 2) |
-					 ((uint16_t)((result_1 >> 8)  & 0xFF) << 3) |
-					 ((uint16_t)((result_1 >> 0)  & 0xFF) << 5);
+	*/
+	uint16_t result_total = 0;
 
-	// Package 2
-	result_total  |= ((uint16_t)((result_2 >> 24) & 0xFF) << 6) |
-					 ((uint16_t)((result_2 >> 16) & 0xFF) << 7) |
-					 ((uint16_t)((result_2 >> 8)  & 0xFF) << 9) |
-					 ((uint16_t)((result_2 >> 0)  & 0xFF) << 10);
+	result_total |= ((result_1 >> 24) & 1) << 0;
+	result_total |= ((result_1 >> 16) & 1) << 1;
+	result_total |= ((result_1 >>  8) & 1) << 2;
+	result_total |= ((result_1 >>  0) & 1) << 3;
 
-	// Package 3
-	result_total  |= ((uint16_t)((result_3 >> 24) & 0xFF) << 11) |
-					 ((uint16_t)((result_3 >> 16) & 0xFF) << 13) |
-					 ((uint16_t)((result_3 >> 8)  & 0xFF) << 14) |
-					 ((uint16_t)((result_3 >> 0)  & 0xFF) << 15);
-*/
+	result_total |= ((result_2 >> 24) & 1) << 4;
+	result_total |= ((result_2 >> 16) & 1) << 5;
+	result_total |= ((result_2 >>  8) & 1) << 6;
+	result_total |= ((result_2 >>  0) & 1) << 7;
+
+	result_total |= ((result_3 >> 24) & 1) << 8;
+	result_total |= ((result_3 >> 16) & 1) << 9;
+	result_total |= ((result_3 >>  8) & 1) << 10;
+	result_total |= ((result_3 >>  0) & 1) << 11;
+
+	result_total |= ((result_4 >> 24) & 1) << 12;
+	result_total |= ((result_4 >> 16) & 1) << 13;
+	result_total |= ((result_4 >>  8) & 1) << 14;
+	result_total |= ((result_4 >>  0) & 1) << 15;
+
 #if FAST_PROFILING
 	DWT_stop(idx_FAST_get_result);
 	DWT_process_data(idx_FAST_get_result);
@@ -332,6 +356,7 @@ __attribute__((hot)) inline bool FAST_detect(ORB_t *orb_obj){
 	DWT_stop(idx_FAST_consecutive_check);
 	DWT_process_data(idx_FAST_consecutive_check);
 #endif
+	g_concecutive_rejections++;
 	return (false);
 	//
 }

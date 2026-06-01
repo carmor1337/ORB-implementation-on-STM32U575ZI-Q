@@ -96,8 +96,14 @@ void get_ORB_patch(ORB_t *orb_obj,ORB_keypoint_patch_t *patch){
 	}
 	return;
 }
-
-
+/// Checks if the pixel are too close to the border of the image such that the
+/// Centroid and BRIEF descriptors can't be sampled efficiently
+bool ORB_border_pixel_check(uint16_t x, uint16_t y){
+	// True if X and Y are not going to be sampled out of range
+	return (((x > ORB_BORDER_MARGIN) && (x < IMAGE_WIDTH - ORB_BORDER_MARGIN))
+			&&
+			((y > ORB_PATCH_RADIUS) && (x < IMAGE_HEIGTH - ORB_PATCH_RADIUS) ));
+}
 /// Extracts the feature points and match
 void ORB_extract_and_match(void){
 	g_feature_count = 0;
@@ -127,6 +133,9 @@ void ORB_extract_and_match(void){
 			if (!is_feature_point){ continue;}
 			uint16_t x = (uint16_t)g_orb_obj.pixel_index % IMAGE_WIDTH;
 			uint16_t y = (uint16_t)g_orb_obj.pixel_index / IMAGE_WIDTH;
+			if ( !ORB_border_pixel_check(x,y)){
+				continue;
+			}
 
 #if ORB_PROFILING
 			DWT_stop(idx_is_feature_point_and_coords);

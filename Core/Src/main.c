@@ -204,15 +204,8 @@ int main(void)
   //HAL_StatusTypeDef clk_result = HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4);
   //printf(osc_result);
   volatile uint32_t clock2 = HAL_RCC_GetHCLKFreq();
-  // SIMD here we gooooo
-  uint8_t b0 = 1;
-  uint8_t b1 = 2;
-  uint8_t b2 = 3;
-  uint8_t b3 = 4;
 
-  uint32_t packed8 = ((uint32_t)b3 << 24) | ((uint32_t)b2 << 16)
-                   | ((uint32_t)b1 <<  8) | b0;
-  uint32_t val = __UADD8(packed8,packed8);
+
   while (1)
   {
 
@@ -258,7 +251,8 @@ int main(void)
 
 	  uint32_t used = stack_usage();
 	  DWT_aggregate_reset_all();
-
+	  uint32_t num_of_high_speed_rejections_total = num_of_high_speed_rejections();
+	  volatile uint32_t num_of_conc_rejections = num_of_concecutive_rejections();
 	  DEBUG_VAR(idx_ORB_total);
 
 
@@ -271,14 +265,14 @@ int main(void)
 	  DEBUG_VAR(kitti_time_us);
 
 
-	  DEBUG_VAR(clock1);
+   	  DEBUG_VAR(clock1);
 	  DEBUG_VAR(clock2);
 	  DEBUG_VAR(used);
-	  DEBUG_VAR(val);
+	  //DEBUG_VAR(val);
 	  DEBUG_VAR(Orb_profile_timed);
 	  DEBUG_VAR(ORB_profile);
-	  DEBUG_VAR(Orb_profile_timed);
-	  DEBUG_VAR(Orb_profile_timed);
+	  DEBUG_VAR(num_of_high_speed_rejections_total);
+	  DEBUG_VAR(num_of_conc_rejections);
 
 	  /*
 	  uint32_t microseconds = cycles / (SystemCoreClock / 1000000U);

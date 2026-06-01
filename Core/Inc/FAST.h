@@ -32,7 +32,8 @@ typedef enum{
 
 bool FAST_init(void);
 
-
+uint32_t num_of_high_speed_rejections(void);
+uint32_t num_of_concecutive_rejections(void);
 bool FAST_assign_image(uint8_t *image_start);
 
 __attribute__((hot)) bool FAST_detect(ORB_t *orb_obj);

@@ -69,7 +69,7 @@
 
 
 // FAST Config
-#define ILLUMINATION_THRESHOLD     70 // Is in uint8_t
+#define ILLUMINATION_THRESHOLD     30 // Is in uint8_t
 #define CONTINUOUS_PIXEL_THRESHOLD 12 // Also called fast 12
 
 // Harris Config
@@ -78,6 +78,8 @@
 #define HARRIS_SOBEL_SIZE  3
 
 // Centroid Config
+#define ORB_PATCH_RADIUS  15
+#define ORB_BORDER_MARGIN (ORB_PATCH_RADIUS + 4)  // +4 for the 4-byte SIMD overshoot safety
 
 // rBRIEF Config
 #define DESCRIPTOR_BYTES 8

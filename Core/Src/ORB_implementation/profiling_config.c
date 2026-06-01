@@ -49,7 +49,7 @@ int8_t idx_rBRIEF_rotation = -1;
 int8_t idx_rBRIEF_sample   = -1;
 #endif
 
-// -------------------------------------------------------
+// ------------------------------------------------------- //
 
 void profiling_init(void) {
     DWT_init();   // hardware init first

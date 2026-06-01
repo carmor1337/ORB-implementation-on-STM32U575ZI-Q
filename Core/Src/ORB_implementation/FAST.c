@@ -74,7 +74,7 @@ static inline uint32_t usub8_sel(uint32_t a, uint32_t b, uint32_t t, uint32_t f)
         : [b]  "r"  (b),
           [t]  "r"  (t),
           [f]  "r"  (f)
-        : /* GE flags are implicit, no need to list */
+        : "cc" /* GE flags are implicit, no need to list */
     );
     return (result);
 
@@ -115,8 +115,10 @@ __attribute__((hot)) inline bool FAST_detect(ORB_t *orb_obj){
 	// Clamping to avid overflows
 	//uint8_t origin_value_plus_threshold  = (uint8_t)MAX(origin_value - ILLUMINATION_THRESHOLD,0);
 	//uint8_t origin_value_minus_threshold = (uint8_t)MAX(origin_value  +ILLUMINATION_THRESHOLD,0);
-	uint8_t origin_value_plus_threshold  = (uint8_t)__USAT((int32_t)origin_value + ILLUMINATION_THRESHOLD, 8);
-	uint8_t origin_value_minus_threshold = (uint8_t)__USAT((int32_t)origin_value - ILLUMINATION_THRESHOLD, 8);
+	// (+1,-1) are to avoid one off calculation
+	// In __USUB8(a, b) GE[n] = 1 when a[n] >= b[n] and for the high speed test it is strictly greater or lesser
+	uint8_t origin_value_plus_threshold  = (uint8_t)__USAT((int32_t)origin_value + ILLUMINATION_THRESHOLD + 1, 8);
+	uint8_t origin_value_minus_threshold = (uint8_t)__USAT((int32_t)origin_value - ILLUMINATION_THRESHOLD - 1, 8);
 
 	// Adding calculated thresholds
 	// Instead of 4 shifts + 3 ORs:
@@ -159,6 +161,10 @@ __attribute__((hot)) inline bool FAST_detect(ORB_t *orb_obj){
 	bool is_bright = __USAD8(bright_result, 0U) >= 3;
 	bool is_dark   = __USAD8(dark_result,   0U) >= 3;
 
+	// testing to see if it fixes the bug by making sure that saturated values does not affect
+	if (origin_value_minus_threshold == 0) is_dark = false;
+	if (origin_value_plus_threshold  == 255) is_bright = false;
+
 	if (__builtin_expect(!is_bright && !is_dark, 1)){
 #if FAST_PROFILING
 		DWT_stop(idx_FAST_HSP);
@@ -193,7 +199,6 @@ __attribute__((hot)) inline bool FAST_detect(ORB_t *orb_obj){
 	DWT_start(idx_FAST_prep_calc);
 #endif
 	//
-
 // Already have index 0,4,8,12
 // Packing all the bits for maths
 
@@ -345,6 +350,9 @@ __attribute__((hot)) inline bool FAST_detect(ORB_t *orb_obj){
 	x &= (x >> 1);
 	x &= (x >> 1);
 
+	if ((x & 0xFFFF) != 0) {
+	    return true;
+	}
 	if (x!=0 ){
 #if FAST_PROFILING
 	DWT_stop(idx_FAST_consecutive_check);

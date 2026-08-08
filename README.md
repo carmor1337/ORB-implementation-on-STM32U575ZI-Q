@@ -1,17 +1,46 @@
 # ORB-implementation-on-STM32U575ZI-Q
-Self made implementation of ORB on a STM32U575ZI-Q. First made a naive working benchmark and is currently trying to optimize it.
+A from-scratch implementation of the ORB (Oriented FAST and Rotated BRIEF) computer vision algorithm for the STM32U575ZI-Q. The project started as a naive working implementation and is currently focused on optimizing performance.
+
+- [What is it?](#what-is-it)
+- [Why did you make it?](#why-did-you-make-it)
+- [Progress](#progress)
+- [Performance](#performance)
+- [Roadmap](#roadmap)
 
 ## What is it
-An implementation of the computer vision algorithm ORB in STM32CUBEIDE on a 320x240 image. It uses DWT cycle counting and SVD to profile and display the results.
+This project implements the ORB feature detection and description algorithm in STM32CubeIDE, targeting 320×240 images.
+
+The implementation uses the DWT cycle counter for cycle-accurate performance measurements and SVD profiling to identify performance bottlenecks and guide optimization.
+
+Each branch corresponds to the current best version of that specific stage in the ORB algorithm. Each commit has detailed profiling information detailing the performance of the system at that stage.
 
 ## Why did you make it
-I made it as a project after I saw this research article https://www.mdpi.com/1424-8220/25/12/3796 and wanted to try to do my own.
+I started this project after reading this [research article](https://www.mdpi.com/1424-8220/25/12/3796). I wanted to try implementing a similar approach myself and explore how a computer vision algorithm such as ORB could be optimized for a resource-constrained embedded system.
 
 ## Progress
 | ORB stage | Status | Next stage |
 |------|-------------|--------|
-| Gaussian blur | X | Not implemented |
+| Gaussian blur | Not implemented | Not implemented |
 | FAST | Optimized | In progress |
 | Harris corner | Optimized | Planned |
 | Image Centroid | Optimized | Planned |
 | BRIEF | Work in progress | Planned |
+
+
+## Performance
+The measurements are the averages.
+| ORB stage | Naive | Current |
+|------|-------------|--------|
+| Gaussian blur | x |x|
+| FAST | x | x |
+| Harris corner | x | x |
+| Image Centroid | x | x |
+| BRIEF | x| x |
+
+
+## Roadmap
+
+- [ ] Solve FAST all-pass bug
+- [ ] Implement Gaussian blur
+- [ ] Complete BRIEF implementation
+- [ ] Profile FAST using assembly 

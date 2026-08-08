@@ -18,13 +18,13 @@ Each branch corresponds to the current best version of that specific stage in th
 I started this project after reading this [research article](https://www.mdpi.com/1424-8220/25/12/3796). I wanted to try implementing a similar approach myself and explore how a computer vision algorithm such as ORB could be optimized for a resource-constrained embedded system.
 
 ## Progress
-| ORB stage | Status | Next stage |
-|------|-------------|--------|
-| Gaussian blur | Not implemented | Not implemented |
-| FAST | Optimized | In progress |
-| Harris corner | Optimized | Planned |
-| Image Centroid | Optimized | Planned |
-| BRIEF | Work in progress | Planned |
+| ORB stage | Status |
+|------|-------------|
+| Gaussian blur | Not implemented |
+| FAST | Optimized | 
+| Harris corner | Optimized |
+| Image Centroid | Optimized  |
+| BRIEF | Work in progress | 
 
 
 ## Performance

@@ -1,13 +1,15 @@
-# ORB-implementation-on-STM32U575ZI-Q
+# ORB implementation on STM32U575ZI-Q
 A from-scratch implementation of the ORB (Oriented FAST and Rotated BRIEF) computer vision algorithm for the STM32U575ZI-Q. The project started as a naive working implementation and is currently focused on optimizing performance.
 
 - [What?](#what)
 - [Why?](#why)
 - [Profiling](#profiling)
+- [Hardware](#hardware)
 - [Progress](#progress)
+- [Running](#running)
 - [Performance](#performance)
 - [Roadmap](#roadmap)
-- [Hardware](#hardware)
+
 
 ## What?
 This project implements the ORB feature detection and description algorithm in STM32CubeIDE, targeting 320×240 images.

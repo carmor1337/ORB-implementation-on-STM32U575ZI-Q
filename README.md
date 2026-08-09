@@ -32,9 +32,9 @@ The measurements are the averages.
 | ORB stage | Naive | Current | Speedup|  Comment| 
 |------|-------------|--------|--------|--------|
 | Gaussian blur | x | x | Not implemented |
-| FAST | 4.75 | 0.5 us | 9.5x |Per pixel|
-| Harris corner | 210.56 us | 12.29 us |17.13x | Per keypoint that pass FAST|
-| Image Centroid |  384.68 us | 26.24us | 14.66x | Per keypoint |
+| FAST | 4.75 us | 0.5 us | x9.5 |Per pixel|
+| Harris corner | 210.56 us | 12.29 us | x17.13 | Per keypoint that pass FAST|
+| Image Centroid |  384.68 us | 26.24us | x14.66 | Per keypoint |
 | BRIEF | 399.81  | x |x | Not implemented |
 
 

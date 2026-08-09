@@ -30,13 +30,14 @@ I started this project after reading this [research article](https://www.mdpi.co
 ## Performance
 The measurements are the averages.
 Speedups= Naive/current execution time
+
 | ORB stage | Naive | Current | Speedup|  Measurement| 
 |------|-------------|--------|--------|--------|
 | Gaussian blur | - | - | - |
 | FAST | 4.75 us | 0.5 us | 9.5x |Per pixel|
 | Harris corner | 210.56 us | 12.29 us | 17.13x | Per FAST keypoint|
 | Image Centroid |  384.68 us | 26.24 us | 14.66x | Per keypoint |
-| BRIEF | 399.81  | - | - | Not implemented |
+| BRIEF | 399.81  | - | - | - |
 
 
 ## Roadmap

@@ -29,13 +29,13 @@ I started this project after reading this [research article](https://www.mdpi.co
 
 ## Performance
 The measurements are the averages.
-| ORB stage | Naive | Current |
-|------|-------------|--------|
-| Gaussian blur | x |x|
-| FAST | x | x |
-| Harris corner | x | x |
-| Image Centroid | x | x |
-| BRIEF | x| x |
+| ORB stage | Naive | Current | Speedup|  Comment| 
+|------|-------------|--------|--------| Comment|
+| Gaussian blur | x | x | Not implemented |
+| FAST | 4.75 | 0.5 us | 9.5x |Per pixel|
+| Harris corner | 210.56 us | 12.29 us |17.13x | Per keypoint that pass FAST|
+| Image Centroid |  384.68 us | 26.24us | 14.66x | Per keypoint |
+| BRIEF | 399.81  | x |x | Not implemented |
 
 
 ## Roadmap

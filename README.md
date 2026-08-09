@@ -69,7 +69,7 @@ Measurements are average execution times.
 
 | ORB stage | Naive | Current | Speedup|  Measurement| 
 |------|-------------|--------|--------|--------|
-| Gaussian blur | — | — | — |
+| Gaussian blur | — | — | — | —
 | FAST | 4.75 us | 0.5 us | 9.5× |Per pixel|
 | Harris corner | 210.56 us | 12.29 us | 17.13× | Per FAST keypoint|
 | Image Centroid |  384.68 us | 26.24 us | 14.66× | Per keypoint |

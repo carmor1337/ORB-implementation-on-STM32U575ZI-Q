@@ -12,7 +12,7 @@ This project implements the ORB feature detection and description algorithm in S
 
 The implementation uses the DWT cycle counter for cycle-accurate performance measurements and SVD profiling to identify performance bottlenecks and guide optimization.
 
-Each branch corresponds to the current best version of that specific stage in the ORB algorithm. Each commit has detailed profiling information detailing the performance of the system at that stage.
+Each branch contains the current best implementation of a specific stage of the ORB pipeline. Commits include profiling information showing how each change affects performance.
 
 ## Why did you make it
 I started this project after reading this [research article](https://www.mdpi.com/1424-8220/25/12/3796). I wanted to try implementing a similar approach myself and explore how a computer vision algorithm such as ORB could be optimized for a resource-constrained embedded system.
@@ -29,18 +29,19 @@ I started this project after reading this [research article](https://www.mdpi.co
 
 ## Performance
 The measurements are the averages.
-| ORB stage | Naive | Current | Speedup|  Comment| 
+Speedups= Naive/current execution time
+| ORB stage | Naive | Current | Speedup|  Measurement| 
 |------|-------------|--------|--------|--------|
-| Gaussian blur | x | x | Not implemented |
-| FAST | 4.75 us | 0.5 us | x9.5 |Per pixel|
-| Harris corner | 210.56 us | 12.29 us | x17.13 | Per keypoint that pass FAST|
-| Image Centroid |  384.68 us | 26.24us | x14.66 | Per keypoint |
-| BRIEF | 399.81  | x |x | Not implemented |
+| Gaussian blur | - | - | - |
+| FAST | 4.75 us | 0.5 us | 9.5x |Per pixel|
+| Harris corner | 210.56 us | 12.29 us | 17.13x | Per FAST keypoint|
+| Image Centroid |  384.68 us | 26.24 us | 14.66x | Per keypoint |
+| BRIEF | 399.81  | - | - | Not implemented |
 
 
 ## Roadmap
 
-- [ ] Solve FAST all-pass bug
+- [ ] Fix FAST all-pass bug
 - [ ] Implement Gaussian blur
 - [ ] Complete BRIEF implementation
-- [ ] Profile FAST using assembly 
+- [ ] Profile and optimize FAST using assembly

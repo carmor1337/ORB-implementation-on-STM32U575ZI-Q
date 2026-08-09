@@ -1,20 +1,21 @@
 # ORB-implementation-on-STM32U575ZI-Q
 A from-scratch implementation of the ORB (Oriented FAST and Rotated BRIEF) computer vision algorithm for the STM32U575ZI-Q. The project started as a naive working implementation and is currently focused on optimizing performance.
 
-- [What is it?](#what-is-it)
-- [Why did you make it?](#why-did-you-make-it)
+- [What is it?](#what)
+- [Why did you make it?](#why)
 - [Progress](#progress)
 - [Performance](#performance)
 - [Roadmap](#roadmap)
+- [Hardware](#hardware)
 
-## What is it
+## What
 This project implements the ORB feature detection and description algorithm in STM32CubeIDE, targeting 320×240 images.
 
 The implementation uses the DWT cycle counter for cycle-accurate performance measurements and SVD profiling to identify performance bottlenecks and guide optimization.
 
 Each branch contains the current best implementation of a specific stage of the ORB pipeline. Commits include profiling information showing how each change affects performance.
 
-## Why did you make it
+## Why
 I started this project after reading this [research article](https://www.mdpi.com/1424-8220/25/12/3796). I wanted to try implementing a similar approach myself and explore how a computer vision algorithm such as ORB could be optimized for a resource-constrained embedded system.
 
 ## Progress
@@ -46,3 +47,12 @@ Speedups= Naive/current execution time
 - [ ] Implement Gaussian blur
 - [ ] Complete BRIEF implementation
 - [ ] Profile and optimize FAST using assembly
+
+## Hardware
+
+- **MCU:** STM32U575ZI-Q
+- **Image resolution:** 320×240
+- **IDE:** STM32CubeIDE 2_0.0
+- **Compiler:** ARM GCC
+- **CPU frequency:** 160 MHz
+- **Board:** NUCLEO-U575ZI-Q

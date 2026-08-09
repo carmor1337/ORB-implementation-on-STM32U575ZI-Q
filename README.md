@@ -63,7 +63,8 @@ This is also the reason for the **"unknown"** category shown in the commit profi
 
 ## Performance
 Measurements are average execution times.
-> Measurements are normalized to the unit shown in the **Measurement** column and are therefore not directly comparable across stages.<
+> Measurements are normalized to the unit shown in the **Measurement** column and are therefore not directly comparable across stages.
+
 **Speedup = Naive execution time / Current execution time**
 
 | ORB stage | Naive | Current | Speedup|  Measurement| 

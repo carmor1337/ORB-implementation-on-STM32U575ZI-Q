@@ -1,5 +1,9 @@
 # ORB implementation on STM32U575ZI-Q
-A from-scratch implementation of the ORB (Oriented FAST and Rotated BRIEF) computer vision algorithm for the STM32U575ZI-Q. The project started as a naive working implementation and is currently focused on optimizing performance.
+The computer vision algorithm ORB (Oriented FAST and Rotated BRIEF) pipeline is implemented from scratch without relying on OpenCV or other computer-vision libraries on the STM32U575ZI-Q. The project started as a naive working implementation and is currently focused on optimizing performance.
+
+**Current results**
+
+At 160 MHz on the STM32U575ZI-Q, the current implementation processes a 320×240 frame in ~214 ms with 700 detected keypoints. FAST, Harris, and centroid processing have been optimized by 9.5×, 17.1×, and 14.7× respectively.
 
 - [What?](#What)
 - [Why?](#Why)
@@ -17,6 +21,27 @@ This project implements the ORB feature detection and description algorithm in S
 The implementation uses the DWT cycle counter for cycle-accurate performance measurements. Serial Wire Viewer (SWV) is used to output profiling and benchmark results through STM32CubeIDE.
 
 Each branch contains the current best implementation of a specific stage of the ORB pipeline. Commits include profiling information showing how each change affects performance.
+```mermaid
+---
+title: ORB pipeline
+---
+flowchart LR
+    IMG["320×240 Image"]
+    FAST["FAST<br/>Corner Detection"]
+    HARRIS["Harris<br/>Corner Score"]
+    CENTROID["Image Centroid<br/>Orientation"]
+    PATCH["Get 31×31<br/>ORB Patch"]
+    BRIEF["Rotated BRIEF<br/>Descriptor"]
+    KP["ORB Keypoint"]
+
+    IMG --> FAST
+    FAST --> HARRIS
+    HARRIS --> CENTROID
+    CENTROID --> PATCH
+    PATCH --> BRIEF
+    BRIEF --> KP
+
+```
 
 ## Why?
 I started this project after reading this [research article](https://www.mdpi.com/1424-8220/25/12/3796). I wanted to try implementing a similar approach myself and explore how a computer vision algorithm such as ORB could be optimized for a resource-constrained embedded system.
@@ -46,6 +71,7 @@ This is also the reason for the **"unknown"** category shown in the commit profi
 - **Image resolution:** 320×240
 - **IDE:** STM32CubeIDE 2.0.0
 - **Compiler:** ARM GCC
+- **Optimization:** -O3
 - **CPU frequency:** 160 MHz
 - **Performance counter:** DWT
 - **Output:** Serial Wire Viewer (SWV)
@@ -62,7 +88,8 @@ This is also the reason for the **"unknown"** category shown in the commit profi
 6. Open the SWV/ITM console to view the profiling results.
 
 ## Performance
-Measurements are average execution times.
+
+**Measurements are average execution times.**
 > Measurements are normalized to the unit shown in the **Measurement** column and are therefore not directly comparable across stages.
 
 **Speedup = Naive execution time / Current execution time**
@@ -75,8 +102,36 @@ Measurements are average execution times.
 | Image Centroid |  384.68 us | 26.24 us | 14.66× | Per keypoint |
 | BRIEF | 399.81 us  | — | — | — |
 
+
+```mermaid
+---
+config:
+    xyChart:
+        showDataLabel: true
+        showDataLabelOutsideBar: true
+---
+xychart
+    title "Measured runtime distribution of the instrumented ORB stages"
+    x-axis [FAST, "Harris corner score", "Get ORB patch", "Image Centroid", BRIEF]
+    y-axis "Runetime (in ms)" 0 --> 110
+    bar [52.78 , 11.44, 30.29, 18.64, 101.84]
+```
+
 <details>
-<summary>Performance diagram (ms)</summary>
+<summary>Measured runtime distribution of the instrumented ORB stages (ms) (Pie chart)</summary>
+
+```mermaid
+pie title Measured runtime distribution of the instrumented ORB stages (ms)
+    "FAST" : 52.78 
+    "Harris corner score" : 11.44
+    "Get ORB patch": 30.29
+    "Image Centroid " : 18.64
+    "BRIEF": 101.84
+```
+</details>
+
+<details>
+<summary>Measured runtime distribution of the instrumented ORB stages (ms) (Sankey)</summary>
 
 ```mermaid
 ---
@@ -85,7 +140,7 @@ config:
     showValues: true
 ---
 sankey
-ORB, FAST, 52.78 ms
+ORB, FAST, 52.78 
 ORB, Harris corner, 11.44
 ORB, Get ORB patch, 30.29
 ORB, Centroid, 18.64
@@ -93,16 +148,16 @@ ORB, BRIEF, 101.84
 
 ```
 
-This diagram is from the raw data below, where each component has been split into its own own category to visualize the time spent distribution. 
+This diagram is from the raw data below, where each component has been split into its own category to visualize the time spent distribution. 
 
-Unaccounted is excluded since it is if adding up the rest it gets to 214ms and with no profiling its is 210ms, hence this is a decent representation of the current state.
+The instrumented stages account for ~215 ms of the ~295 ms total. The remaining ~80 ms is currently attributed to uninstrumented code and profiling overhead, so the diagram shows only the measured ORB stages and should not be interpreted as a complete runtime breakdown.
 
 </details>
 
 <details>
 <summary>Latest raw data </summary>
 
-Is feature point = the small check to ensure valid.
+Is feature point performs a small validation check to determine whether the candidate is a valid feature point.
 
 Get ORB Patch = the 31x31 patch around the feature point for Centroid and Brief to work on.
 
@@ -172,7 +227,7 @@ number of keypoints: 700
 
 ## Roadmap
 
-- [ ] Fix FAST all-pass bug
+- [ ] Fix FAST all-points-are-keypoints bug
 - [ ] Implement Gaussian blur
 - [ ] Optimize memory by storing a 31 x Image width block
 - [ ] Complete BRIEF implementation
